@@ -20,7 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Post routes
 Route::apiResource('/posts', App\Http\Controllers\Api\PostController::class);
 
 // User login
@@ -32,6 +31,8 @@ Route::post('/logout', [AuthController::class, 'logout']);
 // user routes
 Route::post('/update', [UserController::class, 'update']);
 // Route::get('/user', [UserController::class, 'User']);
+
+// user post
 
 
 

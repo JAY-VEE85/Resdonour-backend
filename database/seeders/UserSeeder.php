@@ -13,6 +13,30 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // admin
+        User::create([
+            'fname' => 'User',
+            'lname' => 'Admin',
+            'email' => 'admin@gmail.com',
+            'phone_number' => '1234567881',
+            'city' => 'New York',
+            'barangay' => 'Manhattan',
+            'role' => 'admin',
+            'password' => Hash::make('Admin123'),
+        ]);
+
+        // agri admin
+        User::create([
+            'fname' => 'Agriculural',
+            'lname' => 'Admin',
+            'email' => 'agri@gmail.com',
+            'phone_number' => '1234591827',
+            'city' => 'New York',
+            'barangay' => 'Manhattan',
+            'role' => 'agri',
+            'password' => Hash::make('Agriad123'),
+        ]);
+
         // Create five users
         User::create([
             'fname' => 'John',
@@ -21,6 +45,7 @@ class UserSeeder extends Seeder
             'phone_number' => '1234567890',
             'city' => 'New York',
             'barangay' => 'Manhattan',
+            'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
 
@@ -31,6 +56,7 @@ class UserSeeder extends Seeder
             'phone_number' => '0987654321',
             'city' => 'Los Angeles',
             'barangay' => 'Hollywood',
+            'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
 
@@ -41,6 +67,7 @@ class UserSeeder extends Seeder
             'phone_number' => '1112223333',
             'city' => 'Chicago',
             'barangay' => 'Downtown',
+            'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
 
@@ -51,6 +78,7 @@ class UserSeeder extends Seeder
             'phone_number' => '4445556666',
             'city' => 'Houston',
             'barangay' => 'Midtown',
+            'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
 
@@ -61,6 +89,7 @@ class UserSeeder extends Seeder
             'phone_number' => '7778889999',
             'city' => 'San Francisco',
             'barangay' => 'Mission District',
+            'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
     }

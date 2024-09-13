@@ -44,6 +44,32 @@ class AuthController extends Controller
     }
 
 
+    // public function login(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'email' => 'required|string|email',
+    //         'password' => 'required|string|min:8',
+    //     ]);
+
+    //     // para sa validation to ng login renze
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+
+    //     // tas ito naman for attemp makalogin is user
+    //     if (!Auth::attempt($request->only('email', 'password'))) {
+    //         return response()->json(['error' => 'Invalid credentials'], 401);
+    //     }
+
+    //     $user = Auth::user();
+
+    //     // basta token HAHAHHA
+    //     $token = $user->createToken('auth_token')->plainTextToken;
+
+    //     // response if successful
+    //     return response()->json(['message' => 'Login successful', 'token' => $token, 'user' => $user]);
+    // }
+
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -51,23 +77,28 @@ class AuthController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        // para sa validation to ng login renze
+        // Validation failure
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        // tas ito naman for attemp makalogin is user
+        // Authentication attempt
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json(['error' => 'Invalid credentials'], 401);
         }
 
         $user = Auth::user();
 
-        // basta token HAHAHHA
+        // Generate token
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // response if successful
-        return response()->json(['message' => 'Login successful', 'token' => $token, 'user' => $user]);
+        // Return response with the token, user details, and role
+        return response()->json([
+            'message' => 'Login successful',
+            'token' => $token,
+            'user' => $user,   // user data
+            'role' => $user->role   // assuming 'role' column exists in the users table
+        ]);
     }
 
     public function logout(Request $request)
