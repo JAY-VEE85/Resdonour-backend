@@ -72,18 +72,20 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        // si user
+        // Check if the user is authenticated
         $user = Auth::user();
 
-        // yung token na binigay dito yung tatanggalin something
-        $user->tokens()->delete();
+        if ($user) {
+            // Revoke all tokens
+            $user->tokens()->delete();
 
-        // ito ewan ko kay gpt
-        // Optionally, you can revoke the current token only
-        // $request->user()->currentAccessToken()->delete();
+            // Optionally, revoke the current token only
+            // $request->user()->currentAccessToken()->delete();
 
-        // response
-        return response()->json(['message' => 'Logout successful'], 200);
+            return response()->json(['message' => 'Logout successful'], 200);
+        } else {
+            return response()->json(['error' => 'User not authenticated'], 401);
+        }
     }
 
 
