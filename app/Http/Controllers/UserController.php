@@ -34,21 +34,64 @@ class UserController extends Controller
          ], 200);
      }
 
+    // public function update(Request $request)
+    // {
+    //     // Validate the incoming data
+    //     $request->validate([
+    //         'fname' => 'required|string|max:255',
+    //         'lname' => 'required|string|max:255',
+    //         'email' => 'required|email|max:255|unique:users,email,' . Auth::id(),
+    //         'phone_number' => 'nullable|string|max:15',
+    //         'city' => 'nullable|string|max:255',
+    //         'barangay' => 'nullable|string|max:255',
+    //         'password' => 'nullable|min:8|confirmed', // password confirmation should be required
+    //     ]);
+
+    //     // Get the authenticated user
+    //     $user = Auth::user();
+
+    //     // Update the user's information
+    //     $user->fname = $request->input('fname');
+    //     $user->lname = $request->input('lname');
+    //     $user->email = $request->input('email');
+    //     $user->phone_number = $request->input('phone_number');
+    //     $user->city = $request->input('city');
+    //     $user->barangay = $request->input('barangay');
+
+    //     // If password is provided, hash it before updating
+    //     if ($request->filled('password')) {
+    //         $user->password = Hash::make($request->input('password'));
+    //     }
+
+    //     // Save the changes
+    //     $user->save();
+
+    //     // Return a success response or redirect
+    //     return response()->json([
+    //         'message' => 'User information updated successfully!'
+    //     ]);
+    // }
+
+
     public function update(Request $request)
     {
+        // Get the authenticated user
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
         // Validate the incoming data
         $request->validate([
             'fname' => 'required|string|max:255',
             'lname' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . Auth::id(),
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'phone_number' => 'nullable|string|max:15',
             'city' => 'nullable|string|max:255',
             'barangay' => 'nullable|string|max:255',
-            'password' => 'nullable|min:8|confirmed', // password confirmation should be required
+            'password' => 'nullable|min:8|confirmed',
         ]);
-
-        // Get the authenticated user
-        $user = Auth::user();
 
         // Update the user's information
         $user->fname = $request->input('fname');
@@ -66,9 +109,9 @@ class UserController extends Controller
         // Save the changes
         $user->save();
 
-        // Return a success response or redirect
+        // Return a success response
         return response()->json([
             'message' => 'User information updated successfully!'
-        ]);
+        ], 200);
     }
 }
