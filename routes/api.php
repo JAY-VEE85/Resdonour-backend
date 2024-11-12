@@ -41,9 +41,10 @@ Route::middleware('auth:sanctum')->put('/updatepost/{id}', [UserPostsController:
 Route::middleware('auth:sanctum')->delete('/deletepost/{id}', [UserPostsController::class, 'deletePost']);
 
 // all post
+Route::middleware('auth:sanctum')->get('/posts', [UserPostsController::class, 'getAllPosts']);
 
+// approval para sa admins(agri and admin)
+Route::middleware('auth:sanctum')->patch('/post/{id}/approve', [UserPostsController::class, 'approvePost']);
 
-
-
-
+// backend done, modif nalang if need hehe
 

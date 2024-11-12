@@ -30,37 +30,51 @@ class UserPostsController extends Controller
             return response()->json(['post' => $post], 200);
         }
 
-
-    public function posts(Request $request)
+    public function getAllPosts()
         {
+            $user = auth()->user();
 
-            if (!auth()->check()) {
+            if (!$user) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
+            $posts = UserPost::all();
+
+            return response()->json(['posts' => $posts], 200);
+        }
+
+    public function posts(Request $request)
+        {
+            if (!auth()->check()) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+        
             $request->validate([
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'title' => 'required|string|max:255',
                 'content' => 'required|string',
                 'category' => 'required|string|max:100',
             ]);
-
+        
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('images', 'public'); 
             }
-
+        
             $post = new UserPost();
             $post->user_id = auth()->id(); 
             $post->image = isset($imagePath) ? $imagePath : null; 
             $post->title = $request->input('title');
             $post->content = $request->input('content');
             $post->category = $request->input('category');
-            $post->save();
 
+            $post->status = auth()->user()->role === 'user' ? 'pending' : 'approved';
+            $post->save();
+        
             return response()->json(['message' => 'Post created successfully', 'post' => $post]);
         }
+        
 
-        public function updatePost(Request $request, $id)
+    public function updatePost(Request $request, $id)
         {
             $post = UserPost::find($id);
             
@@ -99,6 +113,31 @@ class UserPostsController extends Controller
         }
         
 
+    // public function deletePost($id)
+    //     {
+    //         $user = auth()->user();
+
+    //         if (!$user) {
+    //             return response()->json(['error' => 'Unauthorized'], 401);
+    //         }
+
+    //         $post = UserPost::find($id);
+
+    //         if (!$post || $post->user_id !== $user->id) {
+    //             return response()->json(['error' => 'Post not found or unauthorized access'], 404);
+    //         }
+
+    //         if ($post->image && file_exists(storage_path('app/public/' . $post->image))) {
+    //             unlink(storage_path('app/public/' . $post->image)); 
+    //         }
+
+    //         $post->delete();
+
+    //         return response()->json(['message' => 'Post deleted successfully'], 200);
+    //     }
+
+    // itong delete na ito is for every users natin, bali front nalang ayusin hehe(wag u nalang pansinin yung nasa taas man HAHAHAH)
+
     public function deletePost($id)
         {
             $user = auth()->user();
@@ -109,7 +148,7 @@ class UserPostsController extends Controller
 
             $post = UserPost::find($id);
 
-            if (!$post || $post->user_id !== $user->id) {
+            if (!$post || ($post->user_id !== $user->id && $user->role !== 'admin' && $user->role !== 'agri')) {
                 return response()->json(['error' => 'Post not found or unauthorized access'], 404);
             }
 
@@ -120,6 +159,23 @@ class UserPostsController extends Controller
             $post->delete();
 
             return response()->json(['message' => 'Post deleted successfully'], 200);
+        }
+
+
+    // idulo ko nalang para mabilis makita
+
+    public function approvePost($id)
+        {
+            $post = UserPost::findOrFail($id);
+
+            if (auth()->user()->role !== 'admin' && auth()->user()->role !== 'agri') {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
+            $post->status = 'approved';
+            $post->save();
+
+            return response()->json(['message' => 'Post approved successfully']);
         }
 
 }
