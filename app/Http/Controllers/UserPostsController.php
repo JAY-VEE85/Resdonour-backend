@@ -67,7 +67,10 @@ class UserPostsController extends Controller
             $post->content = $request->input('content');
             $post->category = $request->input('category');
 
-            $post->status = auth()->user()->role === 'user' ? 'pending' : 'approved';
+            // $post->status = auth()->user()->role === 'user' ? 'pending' : 'approved';
+            $userRole = auth()->user()->role;
+            $post->status = in_array($userRole, ['admin', 'agri']) ? 'approved' : 'pending';
+
             $post->save();
         
             return response()->json(['message' => 'Post created successfully', 'post' => $post]);
@@ -160,22 +163,4 @@ class UserPostsController extends Controller
 
             return response()->json(['message' => 'Post deleted successfully'], 200);
         }
-
-
-    // idulo ko nalang para mabilis makita
-
-    public function approvePost($id)
-        {
-            $post = UserPost::findOrFail($id);
-
-            if (auth()->user()->role !== 'admin' && auth()->user()->role !== 'agri') {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
-
-            $post->status = 'approved';
-            $post->save();
-
-            return response()->json(['message' => 'Post approved successfully']);
-        }
-
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -44,7 +45,15 @@ Route::middleware('auth:sanctum')->delete('/deletepost/{id}', [UserPostsControll
 Route::middleware('auth:sanctum')->get('/posts', [UserPostsController::class, 'getAllPosts']);
 
 // approval para sa admins(agri and admin)
-Route::middleware('auth:sanctum')->patch('/post/{id}/approve', [UserPostsController::class, 'approvePost']);
+Route::middleware('auth:sanctum')->patch('/post/{id}/approve', [AdminController::class, 'approvePost']);
+Route::middleware('auth:sanctum')->patch('/post/{id}/decline', [AdminController::class, 'declinePost']);
+
+// for pending, approved and declined post
+Route::middleware('auth:sanctum')->get('/totalusers', [AdminController::class, 'totalUsers']);
+Route::middleware('auth:sanctum')->get('/totalPosts', [AdminController::class, 'totalPosts']);
+Route::middleware('auth:sanctum')->get('/totalPendings', [AdminController::class, 'totalPendings']);
+Route::middleware('auth:sanctum')->get('/totalApproved', [AdminController::class, 'totalApproved']);
+Route::middleware('auth:sanctum')->get('/totalDeclined', [AdminController::class, 'totalDeclined']);
 
 // backend done, modif nalang if need hehe
 
