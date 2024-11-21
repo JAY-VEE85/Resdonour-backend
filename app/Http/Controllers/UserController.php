@@ -9,26 +9,23 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-     // Apply auth middleware to ensure user is logged in for this method
+    
      public function __construct()
      {
          $this->middleware('auth');
      }
- 
-     // Method to get only the logged-in user
+
      public function User(Request $request)
      {
-         // Get the authenticated user
+
          $user = Auth::user();
- 
-         // If user is not authenticated, return an error message
+
          if (!$user) {
              return response()->json([
                  'message' => 'No authenticated user found.'
              ], 401);
          }
- 
-         // Return the user's information as JSON
+
          return response()->json([
              'user' => $user
          ], 200);
@@ -75,14 +72,13 @@ class UserController extends Controller
 
     public function update(Request $request)
     {
-        // Get the authenticated user
+
         $user = Auth::user();
 
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        // Validate the incoming data
         $request->validate([
             'fname' => 'required|string|max:255',
             'lname' => 'required|string|max:255',
@@ -90,10 +86,20 @@ class UserController extends Controller
             'phone_number' => 'nullable|string|max:15',
             'city' => 'nullable|string|max:255',
             'barangay' => 'nullable|string|max:255',
+            'currentPassword' => 'required_with:password',
             'password' => 'nullable|min:8|confirmed',
         ]);
 
-        // Update the user's information
+        if ($request->filled('currentPassword')) {
+            if (!Hash::check($request->input('currentPassword'), $user->password)) {
+                return response()->json(['message' => 'Current password is incorrect'], 400);
+            }
+
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->input('password'));
+            }
+        }
+
         $user->fname = $request->input('fname');
         $user->lname = $request->input('lname');
         $user->email = $request->input('email');
@@ -101,18 +107,41 @@ class UserController extends Controller
         $user->city = $request->input('city');
         $user->barangay = $request->input('barangay');
 
-        // If password is provided, hash it before updating
         if ($request->filled('password')) {
             $user->password = Hash::make($request->input('password'));
         }
 
-        // Save the changes
         $user->save();
 
-        // Return a success response
         return response()->json([
             'message' => 'User information updated successfully!'
         ], 200);
+    }
+
+    public function verifyCurrentPassword(Request $request)
+    {
+        $user = auth()->user(); 
+
+        $currentPassword = $request->input('currentPassword');
+
+        if (Hash::check($currentPassword, $user->password)) {
+            return response()->json(['passwordValid' => true]);
+        }
+
+        return response()->json(['passwordValid' => false], 400);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'new_password' => 'required|string|min:8|confirmed', 
+        ]);
+
+        $user = Auth::user();
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json(['message' => 'Password changed successfully.'], 200);
     }
 
 }

@@ -13,6 +13,23 @@ class UserPostsController extends Controller
         $this->middleware('auth');
     }
 
+    // public function getPost($id)
+    //     {
+    //         $user = auth()->user();
+
+    //         if (!$user) {
+    //             return response()->json(['error' => 'Unauthorized'], 401);
+    //         }
+
+    //         $post = UserPost::find($id);
+
+    //         if (!$post || $post->user_id !== $user->id) {
+    //             return response()->json(['error' => 'Post not found or unauthorized access'], 404);
+    //         }
+
+    //         return response()->json(['post' => $post], 200);
+    //     }
+
     public function getPost($id)
         {
             $user = auth()->user();
@@ -21,13 +38,32 @@ class UserPostsController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
+            // Find the post with the specified ID
             $post = UserPost::find($id);
 
-            if (!$post || $post->user_id !== $user->id) {
-                return response()->json(['error' => 'Post not found or unauthorized access'], 404);
+            // Check if post exists and if the authenticated user is the owner
+            if (!$post) {
+                return response()->json(['error' => 'Post not found'], 404);
+            }
+
+            if ($post->user_id !== $user->id) {
+                return response()->json(['error' => 'Unauthorized access to this post'], 403);
             }
 
             return response()->json(['post' => $post], 200);
+        }
+
+    public function getUserPosts()
+        {
+            $user = auth()->user();
+        
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+        
+            $posts = $user->posts;
+        
+            return response()->json(['posts' => $posts], 200);
         }
 
     public function getAllPosts()
@@ -38,7 +74,10 @@ class UserPostsController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
-            $posts = UserPost::all();
+            $posts = UserPost::where('status', 'approved')->get()->map(function ($post) use ($user) {
+                $post->liked_by_user = $post->usersWhoLiked->contains('id', $user->id);
+                return $post;
+            });
 
             return response()->json(['posts' => $posts], 200);
         }
@@ -76,7 +115,6 @@ class UserPostsController extends Controller
             return response()->json(['message' => 'Post created successfully', 'post' => $post]);
         }
         
-
     public function updatePost(Request $request, $id)
         {
             $post = UserPost::find($id);
@@ -115,7 +153,6 @@ class UserPostsController extends Controller
             return response()->json(['message' => 'Post updated successfully', 'post' => $post], 200);
         }
         
-
     // public function deletePost($id)
     //     {
     //         $user = auth()->user();
@@ -163,4 +200,51 @@ class UserPostsController extends Controller
 
             return response()->json(['message' => 'Post deleted successfully'], 200);
         }
+
+    public function toggleLikePost($id)
+        {
+            $user = auth()->user();
+        
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+        
+            $post = UserPost::find($id);
+        
+            if (!$post) {
+                return response()->json(['error' => 'Post not found'], 404);
+            }
+        
+            if ($user->likedPosts->contains($post)) {
+                $user->likedPosts()->detach($post);
+                $liked = false;  
+            } else {
+                $user->likedPosts()->attach($post->id); 
+                $liked = true;  
+            }
+        
+            $post->liked_by_user = $liked; 
+        
+            return response()->json([
+                'liked' => $liked,
+                'liked_by_user' => $post->liked_by_user,
+            ], 200);
+        }
+        
+    public function getLikedPosts()
+        {
+            $user = auth()->user();
+
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            $likedPosts = $user->likedPosts->map(function ($post) use ($user) {
+                $post->liked_by_user = $user->likedPosts->contains($post);
+                return $post;
+            });
+
+            return response()->json(['liked_posts' => $likedPosts], 200);
+        }
+
 }

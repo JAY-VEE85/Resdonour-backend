@@ -55,6 +55,24 @@ class AdminController extends Controller
             ], 200);
         }
 
+    public function allPost()
+        {
+            $user = auth()->user();
+        
+            if (!in_array($user->role, ['admin', 'agri'])) {
+                return response()->json([
+                    'message' => 'Access denied. Admins only.'
+                ], 403);
+            }
+        
+            $posts = UserPost::all()->map(function ($post) use ($user) {
+                $post->liked_by_user = $post->usersWhoLiked->contains('id', $user->id);
+                return $post;
+            });
+        
+            return response()->json(['posts' => $posts], 200);
+        }
+
     public function approvePost($id)
         {
             $post = UserPost::findOrFail($id);
