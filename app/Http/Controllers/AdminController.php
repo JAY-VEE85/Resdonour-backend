@@ -55,7 +55,7 @@ class AdminController extends Controller
             ], 200);
         }
 
-    public function allPost()
+        public function allPost()
         {
             $user = auth()->user();
         
@@ -65,13 +65,24 @@ class AdminController extends Controller
                 ], 403);
             }
         
-            $posts = UserPost::all()->map(function ($post) use ($user) {
+            $posts = UserPost::with(['user:id,fname,lname,role'])->get()->map(function ($post) use ($user) {
+
+                if (in_array($post->user->role, ['admin', 'agri'])) {
+                    return null; 
+                }
+        
                 $post->liked_by_user = $post->usersWhoLiked->contains('id', $user->id);
+                $post->fname = $post->user->fname ?? null;
+                $post->lname = $post->user->lname ?? null;
+                unset($post->user);
+        
                 return $post;
-            });
+            })->filter(); 
         
             return response()->json(['posts' => $posts], 200);
         }
+        
+        
 
     public function approvePost($id)
         {

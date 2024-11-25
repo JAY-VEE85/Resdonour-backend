@@ -49,7 +49,7 @@ Route::middleware('auth:sanctum')->delete('/deletepost/{id}', [UserPostsControll
 Route::middleware('auth:sanctum')->get('/posts', [UserPostsController::class, 'getAllPosts']);
 
 // all post for admin
-Route::middleware('auth:sanctum')->get('/getPostReq', [AdminController::class, 'allPost']);
+Route::middleware('auth:sanctum')->get('/allPost', [AdminController::class, 'allPost']);
 
 // approval para sa admins(agri and admin)
 Route::middleware('auth:sanctum')->patch('/post/{id}/approve', [AdminController::class, 'approvePost']);
