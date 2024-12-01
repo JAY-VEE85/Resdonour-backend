@@ -277,6 +277,11 @@ class UserPostsController extends Controller
 
             $likedPosts = $user->likedPosts->map(function ($post) use ($user) {
                 $post->liked_by_user = $user->likedPosts->contains($post);
+
+                $post->image = asset('storage/' . $post->image);
+        
+                $post->user_name = ($post->user->fname ?? '') . ' ' . ($post->user->lname ?? '');
+                
                 return $post;
             });
 
