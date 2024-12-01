@@ -38,10 +38,8 @@ class UserPostsController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
-            // Find the post with the specified ID
             $post = UserPost::find($id);
 
-            // Check if post exists and if the authenticated user is the owner
             if (!$post) {
                 return response()->json(['error' => 'Post not found'], 404);
             }
@@ -66,22 +64,28 @@ class UserPostsController extends Controller
             return response()->json(['posts' => $posts], 200);
         }
 
-    public function getAllPosts()
+        public function getAllPosts()
         {
             $user = auth()->user();
-
+        
             if (!$user) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
-
+        
             $posts = UserPost::where('status', 'approved')->get()->map(function ($post) use ($user) {
                 $post->liked_by_user = $post->usersWhoLiked->contains('id', $user->id);
+        
+                $post->image = asset('storage/' . $post->image);
+        
+                $post->user_name = ($post->user->fname ?? '') . ' ' . ($post->user->lname ?? '');
                 return $post;
             });
-
+        
             return response()->json(['posts' => $posts], 200);
         }
+        
 
+        
     public function posts(Request $request)
         {
             if (!auth()->check()) {
@@ -89,7 +93,7 @@ class UserPostsController extends Controller
             }
         
             $request->validate([
-                'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'title' => 'required|string|max:255',
                 'content' => 'required|string',
                 'category' => 'required|string|max:100',
@@ -115,43 +119,75 @@ class UserPostsController extends Controller
             return response()->json(['message' => 'Post created successfully', 'post' => $post]);
         }
         
-    public function updatePost(Request $request, $id)
-        {
-            $post = UserPost::find($id);
+    // public function updatePost(Request $request, $id)
+    //     {
+    //         $post = UserPost::find($id);
             
-            if (!$post) {
-                return response()->json(['error' => 'Post not found'], 404);
-            }
+    //         if (!$post) {
+    //             return response()->json(['error' => 'Post not found'], 404);
+    //         }
         
-            if ($post->user_id !== auth()->id()) {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
+    //         if ($post->user_id !== auth()->id()) {
+    //             return response()->json(['error' => 'Unauthorized'], 403);
+    //         }
         
-            $validated = $request->validate([
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'title' => 'required|string|max:255',
-                'content' => 'required|string',
-                'category' => 'required|string|max:100',
-            ]);
+    //         $validated = $request->validate([
+    //             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    //             'title' => 'required|string|max:255',
+    //             'content' => 'required|string',
+    //             'category' => 'required|string|max:100',
+    //         ]);
         
 
+    //         if ($request->hasFile('image')) {
+
+    //             if ($post->image && Storage::exists('public/' . $post->image)) {
+    //                 Storage::delete('public/' . $post->image);
+    //             }
+        
+    //             $post->image = $request->file('image')->store('images', 'public');
+    //         }
+        
+    //         $post->title = $validated['title'];
+    //         $post->content = $validated['content'];
+    //         $post->category = $validated['category'];
+    
+    //         $post->save();
+        
+    //         return response()->json(['message' => 'Post updated successfully', 'post' => $post], 200);
+    //     }
+
+    public function updatePost(Request $request, $id) {
+        // Validation rules
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'category' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+    
+        try {
+            $post = UserPost::findOrFail($id);
+    
+            $post->title = $request->title;
+            $post->content = $request->content;
+            $post->category = $request->category;
+    
             if ($request->hasFile('image')) {
-
-                if ($post->image && Storage::exists('public/' . $post->image)) {
-                    Storage::delete('public/' . $post->image);
-                }
-        
-                $post->image = $request->file('image')->store('images', 'public');
+                $image = $request->file('image');
+                $imageName = time().'.'.$image->getClientOriginalExtension();
+                $image->move(public_path('uploads'), $imageName);
+                $post->image = $imageName;
             }
-        
-            $post->title = $validated['title'];
-            $post->content = $validated['content'];
-            $post->category = $validated['category'];
     
             $post->save();
-        
-            return response()->json(['message' => 'Post updated successfully', 'post' => $post], 200);
+    
+            return response()->json(['message' => 'Post updated successfully!']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         }
+    }
+
         
     // public function deletePost($id)
     //     {
