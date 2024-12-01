@@ -25,6 +25,8 @@ class User extends Authenticatable
         'city',
         'barangay',
         'password',
+        'badges',
+        'role', 
     ];
 
     /**
@@ -58,7 +60,13 @@ class User extends Authenticatable
         return $this->belongsToMany(UserPost::class, 'likes', 'user_id', 'id')->withTimestamps();
     }
 
-
-
-
+    public function awardBadge($badge)
+    {
+        $currentBadges = json_decode($this->badges, true) ?? [];
+        if (!in_array($badge, $currentBadges)) {
+            $currentBadges[] = $badge;
+            $this->badges = json_encode($currentBadges);
+            $this->save();
+        }
+    }
 }

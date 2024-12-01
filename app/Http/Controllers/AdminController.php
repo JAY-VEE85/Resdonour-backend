@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\UserPost;
 use App\Models\User;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -55,7 +56,7 @@ class AdminController extends Controller
             ], 200);
         }
 
-        public function allPost()
+        public function allPost(Request $request)
         {
             $user = auth()->user();
         
@@ -65,10 +66,29 @@ class AdminController extends Controller
                 ], 403);
             }
         
-            $posts = UserPost::with(['user:id,fname,lname,role'])->get()->map(function ($post) use ($user) {
-
+            $query = UserPost::with(['user:id,fname,lname,role']);
+        
+            if ($request->has('start_date') && $request->has('end_date')) {
+                try {
+                    $start_date = Carbon::createFromFormat('m-d-y', $request->start_date)->startOfDay();
+                    $end_date = Carbon::createFromFormat('m-d-y', $request->end_date)->endOfDay();
+    
+                    $query->whereBetween('created_at', [$start_date, $end_date]);
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'message' => 'Invalid date format. Please use MM-DD-YY.',
+                        'error' => $e->getMessage()
+                    ], 400);
+                }
+            }
+        
+            if ($request->has('category') && in_array($request->category, ['Compost', 'Plastic', 'Rubber', 'Wood and Paper', 'Miscellaneous Products'])) {
+                $query->where('category', $request->category);
+            }
+        
+            $posts = $query->get()->map(function ($post) use ($user) {
                 if (in_array($post->user->role, ['admin', 'agri'])) {
-                    return null; 
+                    return null;
                 }
         
                 $post->liked_by_user = $post->usersWhoLiked->contains('id', $user->id);
@@ -77,11 +97,10 @@ class AdminController extends Controller
                 unset($post->user);
         
                 return $post;
-            })->filter(); 
+            })->filter();
         
             return response()->json(['posts' => $posts], 200);
         }
-        
         
 
     public function approvePost($id)
@@ -182,4 +201,44 @@ class AdminController extends Controller
                 'Declined posts of resit' => $pendingCount
             ], 200);
         }
+
+    public function awardBadge(Request $request, $id)
+        {
+            if (!in_array(auth()->user()->role, ['admin', 'agri'])) {
+                return response()->json(['message' => 'Unauthorized. Only admin and agri-admin can award badges.'], 403);
+            }
+        
+            $user = User::findOrFail($id);
+        
+            $badge = $request->input('badge');
+        
+            $user->awardBadge($badge);
+        
+            return response()->json(['message' => 'Badge awarded successfully!', 'badges' => json_decode($user->badges)]);
+        }
+    
+    public function removeBadge(Request $request, $id)
+        {
+            if (!in_array(auth()->user()->role, ['admin', 'agri'])) {
+                return response()->json(['message' => 'Unauthorized. Only admin and agri-admin can remove badges.'], 403);
+            }
+
+            $user = User::findOrFail($id);
+
+            $badge = $request->input('badge');
+
+            $currentBadges = json_decode($user->badges, true) ?? [];
+            if (in_array($badge, $currentBadges)) {
+                $currentBadges = array_filter($currentBadges, fn($b) => $b !== $badge);
+                $user->badges = json_encode(array_values($currentBadges));
+                $user->save();
+            }
+
+            return response()->json([
+                'message' => 'Badge removed successfully!',
+                'badges' => json_decode($user->badges)
+            ]);
+        }
+
+        
 }

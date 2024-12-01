@@ -7,7 +7,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserPostsController;
-
+use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\TriviaQuestionController;
+use App\Http\Controllers\UserScoreController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -68,6 +70,36 @@ Route::middleware('auth:sanctum')->get('/user/liked-posts', [UserPostsController
 
 // report generation
 Route::middleware('auth:sanctum')->get('/getReport', [ReportController::class, 'getReport']);
+
+// trivia 
+Route::middleware('auth:sanctum')->prefix('trivia')->group(function () {
+    Route::post('questions', [TriviaQuestionController::class, 'create']);  // admin to
+    Route::get('questions', [TriviaQuestionController::class, 'index']);   // For users to view all questions
+
+    // para kay admin
+    Route::put('questions/{id}', [TriviaQuestionController::class, 'update']);
+    Route::delete('questions/{id}', [TriviaQuestionController::class, 'destroy']); 
+
+    // para sa sagot ni user
+    Route::post('questions/{question_id}/answer', [UserScoreController::class, 'store']);
+});
+
+// badge for users
+Route::middleware('auth:sanctum')->get('/user/{id}/award-badge', [AdminController::class, 'awardBadge']);
+Route::middleware('auth:sanctum')->post('/user/{id}/remove-badge', [AdminController::class, 'removeBadge']);
+
+// for announcement users
+Route::middleware('auth:sanctum')->get('/user/announcements', [UserPostsController::class, 'getAnnouncements']);
+
+// for announcement admin
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/announcements', [AnnouncementController::class, 'store']);
+    Route::get('/announcements', [AnnouncementController::class, 'index']);
+    Route::get('/announcements/{id}', [AnnouncementController::class, 'show']);
+    Route::put('/announcements/{id}', [AnnouncementController::class, 'update']);
+    Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy']);
+});
+
 
 // backend done, modif nalang if need hehe
 

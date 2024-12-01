@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\UserPost;
+use App\Models\Announcement;
 
 
 class UserPostsController extends Controller
@@ -287,5 +288,12 @@ class UserPostsController extends Controller
 
             return response()->json(['liked_posts' => $likedPosts], 200);
         }
-
+        
+    
+    public function getAnnouncements(Request $request)
+        {
+            $announcements = Announcement::all();
+    
+            return response()->json(['announcements' => $announcements], 200);
+        }
 }
