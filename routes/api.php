@@ -118,3 +118,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // backend done, modif nalang if need hehe
 
+// test if API is working
+
+Route::get('/test', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'API is working correctly!'
+    ]);
+});

@@ -92,5 +92,15 @@ class UserSeeder extends Seeder
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
+        User::create([
+            'fname' => 'Jay-vee',
+            'lname' => 'Ubaldo',
+            'email' => 'user123@gmail.com',
+            'phone_number' => '7778889999',
+            'city' => 'Olongpa City',
+            'barangay' => 'Gordon Heights',
+            'role' => 'user',
+            'password' => Hash::make('123123123'),
+        ]);
     }
 }
