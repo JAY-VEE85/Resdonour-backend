@@ -10,7 +10,7 @@ class UserPost extends Model
     use HasFactory;
 
     protected $primaryKey = 'id';
-    protected $fillable = [ 'user_id' ,'image', 'title', 'content', 'category', 'status'];
+    protected $fillable = ['user_id', 'image', 'title', 'content', 'category', 'status', 'badge']; // Add 'badge'
 
     public function user()
     {
@@ -19,13 +19,13 @@ class UserPost extends Model
 
     public function usersWhoLiked()
     {
-        return $this->belongsToMany(User::class, 'likes', 'id', 'user_id');
+        return $this->belongsToMany(User::class, 'likes', 'post_id', 'user_id')->withTimestamps();
     }
 
-    public function users()
-    {
-        return $this->belongsToMany(User::class, 'likes', 'id', 'user_id')->withTimestamps();
-    }
+    // public function users()
+    // {
+    //     return $this->belongsToMany(User::class, 'likes', 'id', 'user_id')->withTimestamps();
+    // }
 
 }
 

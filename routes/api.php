@@ -45,13 +45,15 @@ Route::middleware('auth:sanctum')->post('/post', [UserPostsController::class, 'p
 Route::middleware('auth:sanctum')->get('/post/{id}', [UserPostsController::class, 'getPost']);
 Route::middleware('auth:sanctum')->get('/getUserPosts', [UserPostsController::class, 'getUserPosts']);
 Route::middleware('auth:sanctum')->put('/updatepost/{id}', [UserPostsController::class, 'updatePost']);
-Route::middleware('auth:sanctum')->delete('/deletepost/{id}', [UserPostsController::class, 'deletePost']);
+Route::middleware('auth:sanctum')->delete('/userdeletepost/{id}', [UserPostsController::class, 'deletePost']);
 
 // all post for user
 Route::middleware('auth:sanctum')->get('/posts', [UserPostsController::class, 'getAllPosts']);
 
 // all post for admin
 Route::middleware('auth:sanctum')->get('/allPost', [AdminController::class, 'allPost']);
+Route::middleware('auth:sanctum')->get('/userpost/{id}', [AdminController::class, 'getPost']);
+Route::middleware('auth:sanctum')->delete('/deletepost/{id}', [AdminController::class, 'deletePost']);
 
 // approval para sa admins(agri and admin)
 Route::middleware('auth:sanctum')->patch('/post/{id}/approve', [AdminController::class, 'approvePost']);
@@ -70,11 +72,20 @@ Route::middleware('auth:sanctum')->get('/user/liked-posts', [UserPostsController
 
 // report generation
 Route::middleware('auth:sanctum')->get('/getReport', [ReportController::class, 'getReport']);
+Route::middleware('auth:sanctum')->get('/userTotalPost', [ReportController::class, 'totalPost']);  // for pie
+Route::middleware('auth:sanctum')->get('/userTotalPosts', [ReportController::class, 'totalPosts']); // for table
+
+Route::middleware('auth:sanctum')->get('/likechart', [ReportController::class, 'totalLike']); // for pie
+Route::middleware('auth:sanctum')->get('/liketable', [ReportController::class, 'topliked']); // for pie
+
+Route::middleware('auth:sanctum')->get('/oldestpending', [ReportController::class, 'oldestPending']);
+
+
 
 // trivia 
 Route::middleware('auth:sanctum')->prefix('trivia')->group(function () {
     Route::post('questions', [TriviaQuestionController::class, 'create']);  // admin to
-    Route::get('questions', [TriviaQuestionController::class, 'index']);   // For users to view all questions
+    Route::get('getquestions', [TriviaQuestionController::class, 'index']);   // For users to view all questions
 
     // para kay admin
     Route::put('questions/{id}', [TriviaQuestionController::class, 'update']);
@@ -82,6 +93,10 @@ Route::middleware('auth:sanctum')->prefix('trivia')->group(function () {
 
     // para sa sagot ni user
     Route::post('questions/{question_id}/answer', [UserScoreController::class, 'store']);
+    Route::get('user/scores', [UserScoreController::class, 'getScores']);
+    Route::get('alluser/scores', [UserScoreController::class, 'getAllUsersScores']);
+    Route::get('user/score', [UserScoreController::class, 'getUserScores']);
+
 });
 
 // badge for users
@@ -94,7 +109,7 @@ Route::middleware('auth:sanctum')->get('/user/announcements', [UserPostsControll
 // for announcement admin
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/announcements', [AnnouncementController::class, 'store']);
-    Route::get('/announcements', [AnnouncementController::class, 'index']);
+    Route::get('/getannouncements', [AnnouncementController::class, 'index']);
     Route::get('/announcements/{id}', [AnnouncementController::class, 'show']);
     Route::put('/announcements/{id}', [AnnouncementController::class, 'update']);
     Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy']);

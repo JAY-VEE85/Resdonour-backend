@@ -12,7 +12,6 @@ class AnnouncementController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'date' => 'required|date',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048', 
         ]);
 
@@ -24,16 +23,32 @@ class AnnouncementController extends Controller
         $announcement = Announcement::create([
             'title' => $validated['title'],
             'description' => $validated['description'],
-            'date' => $validated['date'],
             'image' => $imagePath,
         ]);
 
         return response()->json($announcement, 201); 
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $announcements = Announcement::all(); 
+        $dateFrom = $request->input('date_from', null);
+        $dateTo = $request->input('date_to', null);
+
+        $query = Announcement::query();
+
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+
+        $announcements = $query->get()->map(function ($announcement) {
+            // Add 'storage/announcement/images/' prefix to the image path
+            $announcement->image = url('storage/' . $announcement->image);
+            return $announcement;
+        });
+
         return response()->json($announcements);
     }
 
@@ -53,7 +68,6 @@ class AnnouncementController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'date' => 'required|date',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
 
@@ -76,7 +90,6 @@ class AnnouncementController extends Controller
         $announcement->update([
             'title' => $validated['title'],
             'description' => $validated['description'],
-            'date' => $validated['date'],
             'image' => $imagePath,
         ]);
 

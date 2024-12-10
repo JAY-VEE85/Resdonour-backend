@@ -49,19 +49,25 @@ class UserPostsController extends Controller
                 return response()->json(['error' => 'Unauthorized access to this post'], 403);
             }
 
+            $post->image = url('storage/' . $post->image);
+
             return response()->json(['post' => $post], 200);
         }
 
-    public function getUserPosts()
+
+        public function getUserPosts()
         {
             $user = auth()->user();
-        
+
             if (!$user) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
-        
-            $posts = $user->posts;
-        
+
+            $posts = $user->posts->map(function ($post) {
+                $post->image = url('storage/' . $post->image); 
+                return $post;
+            });
+
             return response()->json(['posts' => $posts], 200);
         }
 
@@ -241,32 +247,26 @@ class UserPostsController extends Controller
     public function toggleLikePost($id)
         {
             $user = auth()->user();
-        
+
             if (!$user) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
-        
+
             $post = UserPost::find($id);
-        
+
             if (!$post) {
                 return response()->json(['error' => 'Post not found'], 404);
             }
-        
-            if ($user->likedPosts->contains($post)) {
-                $user->likedPosts()->detach($post);
-                $liked = false;  
-            } else {
-                $user->likedPosts()->attach($post->id); 
-                $liked = true;  
-            }
-        
-            $post->liked_by_user = $liked; 
-        
+
+            $liked = $user->likedPosts()->toggle($post->id);
+
+            $isLiked = count($liked['attached']) > 0;
+
             return response()->json([
-                'liked' => $liked,
-                'liked_by_user' => $post->liked_by_user,
+                'liked' => $isLiked,
             ], 200);
-        }
+    }
+
         
     public function getLikedPosts()
         {
