@@ -124,11 +124,11 @@ class AdminController extends Controller
                 ], 404);
             }
         
-            if (in_array($post->user->role, ['admin', 'agri'])) {
-                return response()->json([
-                    'message' => 'Access denied. Admins or Agri posts are not available for view.'
-                ], 403);
-            }
+            // if (in_array($post->user->role, ['admin', 'agri'])) {
+            //     return response()->json([
+            //         'message' => 'Access denied. Admins or Agri posts are not available for view.'
+            //     ], 403);
+            // }
         
             $post->liked_by_user = $post->usersWhoLiked->contains('id', $user->id);
             $post->fname = $post->user->fname ?? null;

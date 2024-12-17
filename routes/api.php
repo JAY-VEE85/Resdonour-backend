@@ -44,7 +44,7 @@ Route::middleware('auth:sanctum')->post('/change-password', [UserController::cla
 Route::middleware('auth:sanctum')->post('/post', [UserPostsController::class, 'posts']); 
 Route::middleware('auth:sanctum')->get('/post/{id}', [UserPostsController::class, 'getPost']);
 Route::middleware('auth:sanctum')->get('/getUserPosts', [UserPostsController::class, 'getUserPosts']);
-Route::middleware('auth:sanctum')->put('/updatepost/{id}', [UserPostsController::class, 'updatePost']);
+Route::middleware('auth:sanctum')->post('/updatepost/{id}', [UserPostsController::class, 'updatePost']);
 Route::middleware('auth:sanctum')->delete('/userdeletepost/{id}', [UserPostsController::class, 'deletePost']);
 
 // all post for user
@@ -79,8 +79,6 @@ Route::middleware('auth:sanctum')->get('/likechart', [ReportController::class, '
 Route::middleware('auth:sanctum')->get('/liketable', [ReportController::class, 'topliked']); // for pie
 
 Route::middleware('auth:sanctum')->get('/oldestpending', [ReportController::class, 'oldestPending']);
-
-
 
 // trivia 
 Route::middleware('auth:sanctum')->prefix('trivia')->group(function () {

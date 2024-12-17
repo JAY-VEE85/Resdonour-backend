@@ -165,13 +165,16 @@ class UserPostsController extends Controller
     //     }
 
     public function updatePost(Request $request, $id) {
+
+        // return $request->input('title');
         // Validation rules
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'category' => 'required|string|max:255',
+            'category' => 'required|string|max:255',  // Ensuring category is validated correctly
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
+        
     
         try {
             $post = UserPost::findOrFail($id);
@@ -182,9 +185,8 @@ class UserPostsController extends Controller
     
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
-                $imageName = time().'.'.$image->getClientOriginalExtension();
-                $image->move(public_path('uploads'), $imageName);
-                $post->image = $imageName;
+                $path = $image->store('images', 'public');
+                $post->image = $path;
             }
     
             $post->save();
@@ -194,6 +196,7 @@ class UserPostsController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
+    
 
         
     // public function deletePost($id)
