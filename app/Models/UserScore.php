@@ -13,7 +13,7 @@ class UserScore extends Model
 
     public function triviaQuestion()
     {
-        return $this->belongsTo(TriviaQuestion::class);
+        return $this->belongsTo(TriviaQuestion::class, 'question_id'); 
     }
 
     public function user()

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserScore;
+use App\Models\user;
 use App\Models\TriviaQuestion;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,6 @@ class UserScoreController extends Controller
     {
         $user = auth()->user();
 
-        // Check if the user already has an answer for this question
         $existingAnswer = UserScore::where('user_id', $user->id)
             ->where('question_id', $question_id)
             ->first();
@@ -20,7 +20,7 @@ class UserScoreController extends Controller
         if ($existingAnswer) {
             return response()->json([
                 'message' => 'You have already answered this question.',
-            ], 403); // HTTP 403 Forbidden
+            ], 403); 
         }
 
         $question = TriviaQuestion::findOrFail($question_id);
@@ -38,25 +38,62 @@ class UserScoreController extends Controller
         return response()->json(['message' => 'Answer recorded', 'score' => $score]);
     }
 
-    public function getScores(Request $request)
+    public function getScores(Request $request, $id)
     {
-        $user = auth()->user();
-        
+        // Find the user by the passed id
+        $user = User::find($id);
+
+        // Check if the user exists
         if (!$user) {
-            return response()->json(['message' => 'User not authenticated'], 401);
+            return response()->json(['message' => 'User not found'], 404);
         }
-    
-        $scores = UserScore::where('user_id', $user->id)->get();
-    
+
+        // Construct the user's name
+        $userName = trim(($user->fname ?? '') . ' ' . ($user->lname ?? ''));
+
+        // Fetch scores for the specific user
+        $scores = UserScore::with('triviaQuestion')  // Ensure 'triviaQuestion' is loaded
+            ->where('user_id', $user->id)             // Only get scores for this user
+            ->get();
+
+        // If no scores exist for the user, return a message
+        if ($scores->isEmpty()) {
+            return response()->json(['message' => 'No scores found for this user'], 404);
+        }
+
+        // Calculate total score
         $totalScore = $scores->sum('score');
-    
+
+        // Group scores by trivia question ID
+        $triviaScores = $scores->groupBy(function ($score) {
+            return $score->triviaQuestion->id ?? 'unknown';  // Group by trivia question ID
+        })->map(function ($group) {
+            return [
+                'total_score' => $group->sum('score'),
+                'correct_answers' => $group->where('is_correct', true)->count(),
+                'questions' => $group->map(function ($item) {
+                    return [
+                        'question_id' => $item->triviaQuestion->id,  // Correct trivia question ID
+                        'question_text' => $item->triviaQuestion->question ?? 'No question available',  // Question text
+                        'answer' => $item->answer,
+                        'is_correct' => $item->is_correct,
+                        'correct_answer' => $item->triviaQuestion->correct_answer,  // Correct answer
+                    ];
+                })
+            ];
+        });
+
+        // Return the data
         return response()->json([
             'message' => 'Scores retrieved successfully',
-            'user_name' => $user->name,  
+            'user_name' => $userName,
             'total_score' => $totalScore,
-            'scores' => $scores
+            'trivia_scores' => $triviaScores
         ]);
     }
+
+
+
 
     public function getUserScores()
     {

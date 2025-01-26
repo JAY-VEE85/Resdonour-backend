@@ -26,7 +26,9 @@ class User extends Authenticatable
         'barangay',
         'password',
         'badge',
-        'role', 
+        'role',
+        'age',
+        'street'
     ];
 
     /**

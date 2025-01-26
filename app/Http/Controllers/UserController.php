@@ -144,4 +144,33 @@ class UserController extends Controller
         return response()->json(['message' => 'Password changed successfully.'], 200);
     }
 
+    public function index(Request $request)
+    {
+        $users = User::all();  // Retrieve all users from the database
+        return response()->json($users);  // Return users as JSON
+    }
+
+    public function destroy(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user) {
+            if ($user->role == 'admin' || $user->id == $request->user_id) {
+                $userToDelete = User::find($request->user_id);  // Get user by ID
+
+                if ($userToDelete) {
+                    // Perform the deletion
+                    $userToDelete->delete();
+                    return response()->json(['message' => 'User deleted successfully.'], 200);
+                } else {
+                    return response()->json(['message' => 'User not found.'], 404);
+                }
+            } else {
+                return response()->json(['message' => 'Unauthorized action.'], 403);
+            }
+        } else {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+    }
+
 }

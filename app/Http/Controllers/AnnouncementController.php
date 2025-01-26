@@ -4,31 +4,47 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Announcement;
+use Carbon\Carbon;
 
 class AnnouncementController extends Controller
 {
+    
     public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048', 
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'expires_at' => 'nullable|date|after:today', 
         ]);
-
+    
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('announcement', 'public'); 
+            $imagePath = $request->file('image')->store('announcement', 'public');
         }
-
+    
+        $expiresAt = Carbon::parse($validated['expires_at'])->timezone('UTC'); 
+        $currentTime = Carbon::now()->timezone('UTC'); 
+    
+        \Log::info('Expires At:', [$expiresAt]);
+        \Log::info('Current Time:', [$currentTime]);
+    
+        Announcement::where('expires_at', '<', $currentTime)->delete();
+    
         $announcement = Announcement::create([
             'title' => $validated['title'],
             'description' => $validated['description'],
             'image' => $imagePath,
+            'expires_at' => $expiresAt, 
         ]);
-
-        return response()->json($announcement, 201); 
+    
+        return response()->json($announcement, 201);
     }
+    
 
+
+
+    
     public function index(Request $request)
     {
         $dateFrom = $request->input('date_from', null);

@@ -87,11 +87,11 @@ Route::middleware('auth:sanctum')->prefix('trivia')->group(function () {
 
     // para kay admin
     Route::put('questions/{id}', [TriviaQuestionController::class, 'update']);
-    Route::delete('questions/{id}', [TriviaQuestionController::class, 'destroy']); 
+    Route::delete('question/{id}', [TriviaQuestionController::class, 'destroy']); 
 
     // para sa sagot ni user
     Route::post('questions/{question_id}/answer', [UserScoreController::class, 'store']);
-    Route::get('user/scores', [UserScoreController::class, 'getScores']);
+    Route::get('user/score/{id}', [UserScoreController::class, 'getScores']);
     Route::get('alluser/scores', [UserScoreController::class, 'getAllUsersScores']);
     Route::get('user/score', [UserScoreController::class, 'getUserScores']);
 
@@ -112,6 +112,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/announcements/{id}', [AnnouncementController::class, 'update']);
     Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy']);
 });
+
+Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
+Route::middleware('auth:sanctum')->delete('/delete/user', [UserController::class, 'destroy']);
 
 
 // backend done, modif nalang if need hehe
