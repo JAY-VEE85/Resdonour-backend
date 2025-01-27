@@ -69,6 +69,7 @@ Route::middleware('auth:sanctum')->get('/totalDeclined', [AdminController::class
 // likedpost of each user
 Route::middleware('auth:sanctum')->post('/post/{id}/like', [UserPostsController::class, 'toggleLikePost']);
 Route::middleware('auth:sanctum')->get('/user/liked-posts', [UserPostsController::class, 'getLikedPosts']);
+Route::middleware('auth:sanctum')->get('/posts/{id}/total-likes', [UserPostsController::class, 'getTotalLikesForPosts']);
 
 // report generation
 Route::middleware('auth:sanctum')->get('/getReport', [ReportController::class, 'getReport']);

@@ -164,6 +164,28 @@ class UserPostsController extends Controller
     //         return response()->json(['message' => 'Post updated successfully', 'post' => $post], 200);
     //     }
 
+    public function getTotalLikesForPost($id)
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $post = UserPost::find($id);
+
+        if (!$post) {
+            return response()->json(['error' => 'Post not found'], 404);
+        }
+
+        return response()->json([
+            'post_id' => $post->id,
+            'title' => $post->title,
+            'total_likes' => $post->usersWhoLiked()->count(),
+        ], 200);
+    }
+
+
     public function updatePost(Request $request, $id) {
 
         // return $request->input('title');
