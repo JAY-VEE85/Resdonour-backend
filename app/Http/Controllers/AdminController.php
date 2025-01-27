@@ -189,20 +189,31 @@ class AdminController extends Controller
             return response()->json(['message' => 'Post approved successfully']);
         }
 
-    public function declinePost($id)
-        {
-            $post = UserPost::findOrFail($id);
+        public function declinePost(Request $request, $id)
+{
+    // Validate 'remarks' field
+    $request->validate([
+        'remarks' => 'required|string|max:255',
+    ]);
 
-            if (auth()->user()->role !== 'admin' && auth()->user()->role !== 'agri') {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
+    // Find the post by ID
+    $post = UserPost::findOrFail($id);
 
-            $post->status = 'declined';
-            $post->save();
+    // Check user role for authorization
+    if (auth()->user()->role !== 'admin' && auth()->user()->role !== 'agri') {
+        return response()->json(['error' => 'Unauthorized'], 403);
+    }
 
-            return response()->json(['message' => 'Post declined successfully']);
-        }
+    // Update the post with new status and remarks
+    $post->update([
+        'status' => 'declined',
+        'remarks' => $request->remarks,
+    ]);
 
+    return response()->json(['message' => 'Post declined successfully']);
+}
+
+        
     // pending count dito
 
     public function totalPendings(Request $request)

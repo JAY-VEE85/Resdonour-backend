@@ -88,6 +88,8 @@ class UserController extends Controller
             'barangay' => 'nullable|string|max:255',
             'currentPassword' => 'required_with:password',
             'password' => 'nullable|min:8|confirmed',
+            'street' => 'required|string', // Street validation
+            'age' => 'required|integer|min:1|max:120', // Age validation
         ]);
 
         if ($request->filled('currentPassword')) {
@@ -106,6 +108,8 @@ class UserController extends Controller
         $user->phone_number = $request->input('phone_number');
         $user->city = $request->input('city');
         $user->barangay = $request->input('barangay');
+        $user->street = $request->input('street');
+        $user->age = $request->input('age');
 
         if ($request->filled('password')) {
             $user->password = Hash::make($request->input('password'));
