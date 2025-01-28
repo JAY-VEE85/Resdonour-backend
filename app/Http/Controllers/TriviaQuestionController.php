@@ -38,7 +38,7 @@ class TriviaQuestionController extends Controller
         $request->validate([
             'question' => 'required|string',
             'correct_answer' => 'required|string',
-            'answers' => 'required|array',
+            'answers' => 'array',
             'answers.*' => 'string',
         ]);
 
