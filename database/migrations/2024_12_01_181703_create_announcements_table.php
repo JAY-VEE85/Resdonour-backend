@@ -14,6 +14,7 @@ class CreateAnnouncementsTable extends Migration
             $table->string('image')->nullable(); 
             $table->string('title');
             $table->text('description'); 
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
     }

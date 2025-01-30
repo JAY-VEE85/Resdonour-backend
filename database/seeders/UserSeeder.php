@@ -72,6 +72,7 @@ class UserSeeder extends Seeder
             'city' => 'Olongapo City',
             'barangay' => 'Gordon Heights',
             'street' => 'Acacia St. Gordon Heights',
+            'age' => 24,
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -84,6 +85,7 @@ class UserSeeder extends Seeder
             'city' => 'Olongapo City',
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #15 Latiris St. Gordon Heights',
+            'age' => 26,
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -96,6 +98,7 @@ class UserSeeder extends Seeder
             'city' => 'Olongapo City',
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #25 Waling Waling St. Gordon Heights',
+            'age' => 25,
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -108,6 +111,7 @@ class UserSeeder extends Seeder
             'city' => 'Olongapo City',
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #21 Santol St. Gordon Heights',
+            'age' => 25,
             'role' => 'user',
             'password' => Hash::make('123123123'),
         ]);
