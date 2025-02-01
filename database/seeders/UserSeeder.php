@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
 
         // agri admin
         User::create([
-            'fname' => 'Agriculural',
+            'fname' => 'Environmental',
             'lname' => 'Admin',
             'email' => 'agri@gmail.com',
             'phone_number' => '1234591827',

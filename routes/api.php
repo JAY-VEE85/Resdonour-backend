@@ -32,6 +32,10 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/users', [AuthController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login']);
 
+// Route::post('/addphotos', [AdminController::class, 'addphotos']);
+Route::get('/showphotos', [AdminController::class, 'showphotos']);
+
+
 // user logout
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
@@ -54,6 +58,10 @@ Route::middleware('auth:sanctum')->get('/posts', [UserPostsController::class, 'g
 Route::middleware('auth:sanctum')->get('/allPost', [AdminController::class, 'allPost']);
 Route::middleware('auth:sanctum')->get('/userpost/{id}', [AdminController::class, 'getPost']);
 Route::middleware('auth:sanctum')->delete('/deletepost/{id}', [AdminController::class, 'deletePost']);
+
+// for landing page photos
+Route::middleware('auth:sanctum')->post('/addphotos', [AdminController::class, 'addphotos']);
+// Route::middleware('auth:sanctum')->get('/showphotos', [AdminController::class, 'showphotos']);
 
 // approval para sa admins(agri and admin)
 Route::middleware('auth:sanctum')->patch('/post/{id}/approve', [AdminController::class, 'approvePost']);

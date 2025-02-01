@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\UserPost;
 use App\Models\User;
+use App\Models\LandingPhotos;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -324,64 +326,108 @@ class AdminController extends Controller
     //     }
 
     public function topliked(Request $request)
-{
-    $user = auth()->user();
+    {
+        $user = auth()->user();
 
-    if (!$user) {
-        return response()->json(['error' => 'Unauthorized'], 401);
-    }
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
 
-    $dateFrom = $request->input('date_from', null);
-    $dateTo = $request->input('date_to', null);
+        $dateFrom = $request->input('date_from', null);
+        $dateTo = $request->input('date_to', null);
 
-    $query = UserPost::withCount('usersWhoLiked')
-                    ->whereHas('usersWhoLiked');
+        $query = UserPost::withCount('usersWhoLiked')
+                        ->whereHas('usersWhoLiked');
 
-    $query->whereHas('user', function ($q) {
-        $q->whereNotIn('role', ['admin', 'agri']);
-    });
+        $query->whereHas('user', function ($q) {
+            $q->whereNotIn('role', ['admin', 'agri']);
+        });
 
-    if ($dateFrom) {
-        $query->whereDate('created_at', '>=', $dateFrom);
-    }
-    if ($dateTo) {
-        $query->whereDate('created_at', '<=', $dateTo);
-    }
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
 
-    $query->having('users_who_liked_count', '>', 0);
+        $query->having('users_who_liked_count', '>', 0);
 
-    $posts = $query->orderByDesc('users_who_liked_count')
-                ->take(10)
-                ->get();
+        $posts = $query->orderByDesc('users_who_liked_count')
+                    ->take(10)
+                    ->get();
 
-    // Automatically award "Top Liked" badge
-    foreach ($posts as $post) {
-        $user = $post->user;
-        
-        if ($user) {
-            // Check if the user already has the "Top Liked" badge
-            $badges = json_decode($user->badges, true) ?? [];
-            if (!in_array('Top Liked', $badges)) {
-                $badges[] = 'Top Liked';
-                $user->badges = json_encode($badges);
-                $user->save();
+        // Automatically award "Top Liked" badge
+        foreach ($posts as $post) {
+            $user = $post->user;
+            
+            if ($user) {
+                // Check if the user already has the "Top Liked" badge
+                $badges = json_decode($user->badges, true) ?? [];
+                if (!in_array('Top Liked', $badges)) {
+                    $badges[] = 'Top Liked';
+                    $user->badges = json_encode($badges);
+                    $user->save();
+                }
             }
         }
+
+        return response()->json([
+            'posts' => $posts->map(function ($post) {
+                return [
+                    'post_id' => $post->id,
+                    'title' => $post->title,
+                    'user_name' => $post->user->fname . ' ' . $post->user->lname,
+                    'likes_count' => $post->users_who_liked_count,
+                    'created_at' => $post->created_at,
+                ];
+            })
+        ], 200);
     }
 
-    return response()->json([
-        'posts' => $posts->map(function ($post) {
-            return [
-                'post_id' => $post->id,
-                'title' => $post->title,
-                'user_name' => $post->user->fname . ' ' . $post->user->lname,
-                'likes_count' => $post->users_who_liked_count,
-                'created_at' => $post->created_at,
-            ];
-        })
-    ], 200);
-}
-
-
+    // for landing page photos
+    public function addphotos(Request $request)
+    {
+        // dd([
+        //     'file_count' => count($request->file('images')),
+        //     'files' => $request->file('images')
+        // ]);
         
+        $validated = $request->validate([
+            'images' => 'required|array',
+            'images.*' => 'required|image|mimes:jpg,jpeg,png,gif|max:10240',
+        ]);
+
+        $imagesPaths = []; // Array to store file paths
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagesPaths[] = $image->store('landingphotos', 'public'); // Store each image
+            }
+        }
+
+        $landing_photos = LandingPhotos::create([
+            'images' => json_encode($imagesPaths) // Store as JSON array
+        ]);
+
+        return response()->json($landing_photos, 201);
+    }
+
+    public function showphotos(Request $request)
+    {
+        $landingPhotos = LandingPhotos::orderBy('created_at', 'desc')->get();
+
+        foreach ($landingPhotos as $photo) {
+            // Decode the images JSON array
+            $images = json_decode($photo->images, true);
+
+            // Generate full URLs for each image
+            if (is_array($images)) {
+                $photo->images = array_map(fn($img) => asset('storage/' . $img), $images);
+            } else {
+                $photo->images = [];
+            }
+        }
+
+        return response()->json($landingPhotos, 200);
+    }
 }
