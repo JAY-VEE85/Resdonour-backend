@@ -10,6 +10,9 @@ use App\Http\Controllers\UserPostsController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\TriviaQuestionController;
 use App\Http\Controllers\UserScoreController;
+
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\VerifyEmailController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -27,10 +30,44 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::apiResource('/posts', App\Http\Controllers\Api\PostController::class);
 
+// email verification
+Route::get('/email/verify', function (Request $request) {
+    return response()->json(['message' => 'Please verify your email']);
+})->name('verification.notice');
+
+// Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, 'verify'])
+// ->middleware(['signed'])
+// ->name('verification.verify');
+
+Route::post('/verify-email-with-code', [VerifyEmailController::class, 'verifyWithCode']);
+
+// wala pa po
+Route::post('/email/resend', function (Request $request) {
+    $email = $request->input('email'); // Get the email from request
+    $user = \App\Models\User::where('email', $email)->first();
+
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    if ($user->hasVerifiedEmail()) {
+        return response()->json(['message' => 'Email already verified']);
+    }
+
+    $user->sendEmailVerificationNotification();
+
+    return response()->json(['message' => 'Verification email resent']);
+})->name('verification.resend');
+
 // User login/Register
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/users', [AuthController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::delete('/cancel-registration', [AuthController::class, 'cancelRegistration']);
+
+// forgot password na wala pa sa front
+Route::post('user/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('user/reset-password', [AuthController::class, 'resetPassword']);
 
 // Route::post('/addphotos', [AdminController::class, 'addphotos']);
 Route::get('/showphotos', [AdminController::class, 'showphotos']);

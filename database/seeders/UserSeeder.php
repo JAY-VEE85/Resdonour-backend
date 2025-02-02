@@ -21,6 +21,7 @@ class UserSeeder extends Seeder
             'phone_number' => '+639011129219',
             'city' => 'Olongapo City',
             'barangay' => 'Gordon Heights',
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'admin',
             'password' => Hash::make('Admin123'),
         ]);
@@ -33,6 +34,7 @@ class UserSeeder extends Seeder
             'phone_number' => '1234591827',
             'city' => 'Olongapo',
             'barangay' => 'Gordon Heights',
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'agri',
             'password' => Hash::make('Agriad123'),
         ]);
@@ -47,6 +49,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #12 Ipil-Ipil St. (Long Rd, Upper)',
             'age' => 20,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -60,6 +63,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Woodhouse St. Gordon Heights',
             'age' => 20,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -73,6 +77,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Acacia St. Gordon Heights',
             'age' => 24,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -86,6 +91,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #15 Latiris St. Gordon Heights',
             'age' => 26,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -99,6 +105,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #25 Waling Waling St. Gordon Heights',
             'age' => 25,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -112,6 +119,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #21 Santol St. Gordon Heights',
             'age' => 25,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('123123123'),
         ]);
@@ -125,6 +133,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #12 Ipil-Ipil St. (Long Rd, Upper)',
             'age' => 22,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -138,6 +147,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #3 Diwa St. (Waterdam Rd, Lower)',
             'age' => 24,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -151,6 +161,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #15 Latiris St. (Waterdam Rd, Lower)',
             'age' => 21,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -164,6 +175,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #19 Palo Santo St. (Waterdam Rd, Lower)',
             'age' => 23,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -177,6 +189,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #7 Duhat St. (Waterdam Rd, Lower)',
             'age' => 25,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -190,6 +203,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #10 Guava St. (Waterdam Rd, Lower)',
             'age' => 27,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -203,6 +217,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #4 Adamos St. (Waterdam Rd, Lower)',
             'age' => 22,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -216,6 +231,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #9 Fire Tree St. (Waterdam Rd, Lower)',
             'age' => 26,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -229,6 +245,7 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #8 Eucalyptus St. (Waterdam Rd, Lower)',
             'age' => 24,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
@@ -242,9 +259,14 @@ class UserSeeder extends Seeder
             'barangay' => 'Gordon Heights',
             'street' => 'Blk #5 Balete St. (Waterdam Rd, Lower)',
             'age' => 28,
+            'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'user',
             'password' => Hash::make('password123'),
         ]);
+
+        // ANG DAMI PALA SEEDER HUHU
+        // 'email_verified_at' => '2025-02-02 04:18:09',
+        // hehe palagyan na lang para ma-login, nde kasi maopen kapag di email verified
         
         User::create([
             'fname' => 'Kristine',
