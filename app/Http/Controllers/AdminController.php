@@ -412,6 +412,29 @@ class AdminController extends Controller
         return response()->json($landing_photos, 201);
     }
 
+    public function showallphotos()
+    {
+        $landingPhotos = LandingPhotos::orderBy('created_at', 'desc')->get();
+        // Fetch all landing photos
+        // $landingPhotos = LandingPhotos::all();
+
+        // Decode the images JSON array and generate full URLs for each image
+        foreach ($landingPhotos as $photo) {
+            // Decode the images JSON array
+            $images = json_decode($photo->images, true);
+
+            // Generate full URLs for each image
+            if (is_array($images)) {
+                $photo->images = array_map(fn($img) => asset('storage/' . $img), $images);
+            } else {
+                $photo->images = [];
+            }
+        }
+
+        // Return the data as a JSON response
+        return response()->json($landingPhotos);
+    }
+
     public function showphotos(Request $request)
     {
         $landingPhotos = LandingPhotos::orderBy('created_at', 'desc')->get();
@@ -430,4 +453,56 @@ class AdminController extends Controller
 
         return response()->json($landingPhotos, 200);
     }
+
+    public function deletephoto($id)
+    {
+        $landingPhoto = LandingPhotos::find($id);
+
+        if (!$landingPhoto) {
+            return response()->json(['message' => 'Photo not found.'], 404);
+        }
+
+        $images = json_decode($landingPhoto->images, true);
+
+        // Delete the images from storage
+        foreach ($images as $image) {
+            Storage::disk('public')->delete($image);
+        }
+
+        // Delete the record from the database
+        $landingPhoto->delete();
+
+        return response()->json(['message' => 'Image deleted successfully.'], 200);
+    }
+
+    public function deleteAllPhotos(Request $request)
+    {
+        $ids = $request->input('ids');  // Get ids from request body
+
+        // Check if ids are provided
+        if (empty($ids)) {
+            return response()->json(['message' => 'No IDs provided'], 400);
+        }
+
+        // Delete the selected photos based on the IDs (excluding the latest one)
+        foreach ($ids as $id) {
+            $photo = LandingPhotos::find($id);
+
+            if ($photo) {
+                $images = json_decode($photo->images, true);
+
+                // Delete the images from storage
+                foreach ($images as $image) {
+                    Storage::disk('public')->delete($image);
+                }
+
+                // Delete the record from the database
+                $photo->delete();
+            }
+        }
+
+        return response()->json(['message' => 'Selected images deleted successfully.'], 200);
+    }
+
+
 }

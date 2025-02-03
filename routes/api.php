@@ -71,6 +71,7 @@ Route::post('user/reset-password', [AuthController::class, 'resetPassword']);
 
 // Route::post('/addphotos', [AdminController::class, 'addphotos']);
 Route::get('/showphotos', [AdminController::class, 'showphotos']);
+// Route::get('/showallphotos', [AdminController::class, 'showallphotos']);
 
 
 // user logout
@@ -98,7 +99,9 @@ Route::middleware('auth:sanctum')->delete('/deletepost/{id}', [AdminController::
 
 // for landing page photos
 Route::middleware('auth:sanctum')->post('/addphotos', [AdminController::class, 'addphotos']);
-// Route::middleware('auth:sanctum')->get('/showphotos', [AdminController::class, 'showphotos']);
+Route::middleware('auth:sanctum')->get('/showallphotos', [AdminController::class, 'showallphotos']);
+Route::middleware('auth:sanctum')->delete('/deletephoto/{id}', [AdminController::class, 'deletephoto']);
+Route::middleware('auth:sanctum')->post('/deleteAllPhotos', [AdminController::class, 'deleteAllPhotos']);
 
 // approval para sa admins(agri and admin)
 Route::middleware('auth:sanctum')->patch('/post/{id}/approve', [AdminController::class, 'approvePost']);
