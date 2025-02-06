@@ -78,7 +78,8 @@ Route::get('/showphotos', [AdminController::class, 'showphotos']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
 // user account update
-Route::middleware('auth:sanctum')->post('/update', [UserController::class, 'update']);
+Route::middleware('auth:sanctum')->get('/getUser', [UserController::class, 'getUser']);
+Route::middleware('auth:sanctum')->put('/update', [UserController::class, 'update']);
 Route::middleware('auth:sanctum')->post('/verify-current-password', [UserController::class, 'verifyCurrentPassword']);
 Route::middleware('auth:sanctum')->post('/change-password', [UserController::class, 'changePassword']);
 

@@ -10,117 +10,115 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     
-     public function __construct()
-     {
-         $this->middleware('auth');
-     }
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
 
-     public function User(Request $request)
-     {
+    public function getUser(Request $request)
+    {
 
-         $user = Auth::user();
+        $user = Auth::user();
 
-         if (!$user) {
-             return response()->json([
-                 'message' => 'No authenticated user found.'
-             ], 401);
-         }
+        if (!$user) {
+            return response()->json([
+                'message' => 'No authenticated user found.'
+            ], 401);
+        }
 
-         return response()->json([
-             'user' => $user
-         ], 200);
-     }
-
-    // public function update(Request $request)
-    // {
-    //     // Validate the incoming data
-    //     $request->validate([
-    //         'fname' => 'required|string|max:255',
-    //         'lname' => 'required|string|max:255',
-    //         'email' => 'required|email|max:255|unique:users,email,' . Auth::id(),
-    //         'phone_number' => 'nullable|string|max:15',
-    //         'city' => 'nullable|string|max:255',
-    //         'barangay' => 'nullable|string|max:255',
-    //         'password' => 'nullable|min:8|confirmed', // password confirmation should be required
-    //     ]);
-
-    //     // Get the authenticated user
-    //     $user = Auth::user();
-
-    //     // Update the user's information
-    //     $user->fname = $request->input('fname');
-    //     $user->lname = $request->input('lname');
-    //     $user->email = $request->input('email');
-    //     $user->phone_number = $request->input('phone_number');
-    //     $user->city = $request->input('city');
-    //     $user->barangay = $request->input('barangay');
-
-    //     // If password is provided, hash it before updating
-    //     if ($request->filled('password')) {
-    //         $user->password = Hash::make($request->input('password'));
-    //     }
-
-    //     // Save the changes
-    //     $user->save();
-
-    //     // Return a success response or redirect
-    //     return response()->json([
-    //         'message' => 'User information updated successfully!'
-    //     ]);
-    // }
-
+        return response()->json([
+            'user' => $user,
+            'message' => 'User Data Successfully Fetched',
+        ], 200);
+    }
 
     public function update(Request $request)
     {
-
         $user = Auth::user();
 
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $request->validate([
-            'fname' => 'required|string|max:255',
-            'lname' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-            'phone_number' => 'nullable|string|max:15',
-            'city' => 'nullable|string|max:255',
-            'barangay' => 'nullable|string|max:255',
-            'currentPassword' => 'required_with:password',
-            'password' => 'nullable|min:8|confirmed',
-            'street' => 'required|string', // Street validation
-            'age' => 'required|integer|min:1|max:120', // Age validation
-        ]);
-
-        if ($request->filled('currentPassword')) {
-            if (!Hash::check($request->input('currentPassword'), $user->password)) {
-                return response()->json(['message' => 'Current password is incorrect'], 400);
-            }
-
-            if ($request->filled('password')) {
-                $user->password = Hash::make($request->input('password'));
-            }
+        try {
+            $validatedData = $request->validate([
+                'fname' => 'required|string|max:255',
+                'lname' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+                'phone_number' => 'nullable|string|max:16',
+                'city' => 'nullable|string|max:255',
+                'barangay' => 'nullable|string|max:255',
+                'street' => 'required|string',
+                'age' => 'required|integer|min:1|max:120',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
         }
 
-        $user->fname = $request->input('fname');
-        $user->lname = $request->input('lname');
-        $user->email = $request->input('email');
-        $user->phone_number = $request->input('phone_number');
-        $user->city = $request->input('city');
-        $user->barangay = $request->input('barangay');
-        $user->street = $request->input('street');
-        $user->age = $request->input('age');
+        \Log::info('User before update:', $user->toArray());
+        \Log::info('Updating with data:', $validatedData);
 
-        if ($request->filled('password')) {
-            $user->password = Hash::make($request->input('password'));
-        }
+        $user->update($validatedData);
 
-        $user->save();
+        \Log::info('User after update:', $user->fresh()->toArray());
 
         return response()->json([
-            'message' => 'User information updated successfully!'
+            'message' => 'User information updated successfully!',
+            'user' => $user->fresh() // Ensures the latest data is returned
         ], 200);
     }
+
+
+
+    // public function update(Request $request)
+    // {
+
+    //     $user = Auth::user();
+
+    //     if (!$user) {
+    //         return response()->json(['message' => 'Unauthorized'], 401);
+    //     }
+
+    //     $request->validate([
+    //         'fname' => 'required|string|max:255',
+    //         'lname' => 'required|string|max:255',
+    //         'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+    //         'phone_number' => 'nullable|string|max:15',
+    //         'city' => 'nullable|string|max:255',
+    //         'barangay' => 'nullable|string|max:255',
+    //         'street' => 'required|string', // Street validation
+    //         'age' => 'required|integer|min:1|max:120', // Age validation
+    //     ]);
+
+    //     // if ($request->filled('currentPassword')) {
+    //     //     if (!Hash::check($request->input('currentPassword'), $user->password)) {
+    //     //         return response()->json(['message' => 'Current password is incorrect'], 400);
+    //     //     }
+
+    //     //     if ($request->filled('password')) {
+    //     //         $user->password = Hash::make($request->input('password'));
+    //     //     }
+    //     // }
+
+    //     // $user->fname = $request->input('fname');
+    //     // $user->lname = $request->input('lname');
+    //     // $user->email = $request->input('email');
+    //     // $user->phone_number = $request->input('phone_number');
+    //     // $user->city = $request->input('city');
+    //     // $user->barangay = $request->input('barangay');
+    //     // $user->street = $request->input('street');
+    //     // $user->age = $request->input('age');
+
+    //     // if ($request->filled('password')) {
+    //     //     $user->password = Hash::make($request->input('password'));
+    //     // }
+
+    //     // $user->save();
+
+    //     return response()->json([
+    //         'message' => 'User information updated successfully!'
+    //     ], 200);
+    // }
 
     public function verifyCurrentPassword(Request $request)
     {
