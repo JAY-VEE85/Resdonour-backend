@@ -41,44 +41,26 @@ Route::get('/email/verify', function (Request $request) {
 
 Route::post('/verify-email-with-code', [VerifyEmailController::class, 'verifyWithCode']);
 
-// wala pa po
-Route::post('/email/resend', function (Request $request) {
-    $email = $request->input('email'); // Get the email from request
-    $user = \App\Models\User::where('email', $email)->first();
-
-    if (!$user) {
-        return response()->json(['message' => 'User not found'], 404);
-    }
-
-    if ($user->hasVerifiedEmail()) {
-        return response()->json(['message' => 'Email already verified']);
-    }
-
-    $user->sendEmailVerificationNotification();
-
-    return response()->json(['message' => 'Verification email resent']);
-})->name('verification.resend');
+// send new email verification code
+Route::post('/email/resend', [VerifyEmailController::class, 'resendVerificationCode']);
 
 // User login/Register
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/users', [AuthController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::delete('/cancel-registration', [AuthController::class, 'cancelRegistration']);
+Route::match(['post', 'delete'],'/cancel-due-refresh', [AuthController::class, 'cancelDueRefresh']);
 
 // forgot password na wala pa sa front
 Route::post('user/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('user/reset-password', [AuthController::class, 'resetPassword']);
 
-// Route::post('/addphotos', [AdminController::class, 'addphotos']);
-Route::get('/showphotos', [AdminController::class, 'showphotos']);
-// Route::get('/showallphotos', [AdminController::class, 'showallphotos']);
-
-
 // user logout
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
 // user account update
-Route::middleware('auth:sanctum')->post('/update', [UserController::class, 'update']);
+Route::middleware('auth:sanctum')->get('/getUser', [UserController::class, 'getUser']);
+Route::middleware('auth:sanctum')->put('/update', [UserController::class, 'update']);
 Route::middleware('auth:sanctum')->post('/verify-current-password', [UserController::class, 'verifyCurrentPassword']);
 Route::middleware('auth:sanctum')->post('/change-password', [UserController::class, 'changePassword']);
 
@@ -99,6 +81,7 @@ Route::middleware('auth:sanctum')->delete('/deletepost/{id}', [AdminController::
 
 // for landing page photos
 Route::middleware('auth:sanctum')->post('/addphotos', [AdminController::class, 'addphotos']);
+Route::get('/showphotos', [AdminController::class, 'showphotos']); // without auth kasi nasa landing page
 Route::middleware('auth:sanctum')->get('/showallphotos', [AdminController::class, 'showallphotos']);
 Route::middleware('auth:sanctum')->delete('/deletephoto/{id}', [AdminController::class, 'deletephoto']);
 Route::middleware('auth:sanctum')->post('/deleteAllPhotos', [AdminController::class, 'deleteAllPhotos']);

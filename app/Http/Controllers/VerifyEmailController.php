@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Auth\Events\Verified;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\VerifyEmail;
 use App\Models\User;
 
 class VerifyEmailController extends Controller
@@ -61,5 +63,31 @@ class VerifyEmailController extends Controller
         }
 
         return response()->json(['error' => 'Invalid verification code.'], 400);
+    }
+
+    public function resendVerificationCode(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email already verified']);
+        }
+
+        // Generate a new verification code
+        $newCode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        $user->update(['verification_code' => $newCode]);
+
+        // Send email notification
+        Notification::send($user, new VerifyEmail());
+
+        return response()->json(['message' => 'A new verification code has been sent to your email.']);
     }
 }

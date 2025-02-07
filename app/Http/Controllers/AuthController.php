@@ -248,4 +248,31 @@ class AuthController extends Controller
         ], 200);
     }
 
+    public function cancelDueRefresh(Request $request)
+    {
+        \Log::info('Cancel Registration Request:', $request->all());
+
+        // Validate the request to ensure email is provided
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        // Find the user by email
+        $user = User::where('email', $request->email)->first();
+
+        // Ensure the user has not yet verified their email
+        if ($user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'You cannot cancel your registration because your email is already verified.'
+            ], 403); // Forbidden action
+        }
+
+        // Delete the user from the database
+        $user->delete();
+
+        return response()->json([
+            'message' => 'Your registration has been successfully canceled, and your account has been deleted.'
+        ], 200);
+    }
+
 }
