@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\UserPost;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 
 class ReportController extends Controller
 {
@@ -298,5 +299,85 @@ class ReportController extends Controller
             })
         ], 200);
     }
+
+    // Function to fetch category data for the pie chart
+    public function mostCategories(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $categories = [
+            "Compost", "Plastic", "Rubber", "Wood and Paper", "Glass", "Boxes", "Mixed Waste", "Cloth", "Issues", "Miscellaneous Products", "Tips & tricks"
+        ];
+
+        // Get start and end date from the request, default to current month if not provided
+        $startDate = Carbon::parse($request->input('start_date', Carbon::now()->startOfMonth()->toDateString()));
+        $endDate = Carbon::parse($request->input('end_date', Carbon::now()->endOfMonth()->toDateString()));
+
+        $data = UserPost::where('status', 'approved')  // Filters for 'approved' posts
+            ->whereIn('category', $categories)         // Filters posts by category
+            ->whereBetween('created_at', [$startDate, $endDate])  // Filters posts within the given date range
+            ->selectRaw('category, COUNT(*) as count')  // Groups and counts posts by category
+            ->groupBy('category')  // Groups the posts by category
+            ->orderByDesc('count')  // Orders categories by post count in descending order
+            ->get();
+
+        return response()->json($data);
+    }
+
+
+    // Function to fetch category data for the table
+    public function tableCategories(Request $request)
+{
+    // Ensure the user is authenticated
+    $user = auth()->user();
+
+    if (!$user) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    // Get start and end date from the request, default to current month if not provided
+    $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
+    $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
+
+    // Validate date formats (YYYY-MM-DD)
+    if (!Carbon::hasFormat($startDate, 'Y-m-d')) {
+        return response()->json(['error' => 'Invalid start_date format. Use YYYY-MM-DD'], 400);
+    }
+
+    if (!Carbon::hasFormat($endDate, 'Y-m-d')) {
+        return response()->json(['error' => 'Invalid end_date format. Use YYYY-MM-DD'], 400);
+    }
+
+    // Parse the dates using Carbon
+    try {
+        $startDate = Carbon::parse($startDate)->startOfDay(); // Ensure the start date includes all of the day
+        $endDate = Carbon::parse($endDate)->endOfDay(); // Ensure the end date includes all of the day
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Invalid date format'], 400);
+    }
+
+    // Categories to track
+    $categories = [
+        "Compost", "Plastic", "Rubber", "Wood and Paper", "Glass", "Boxes", "Mixed Waste", "Cloth", "Issues", "Miscellaneous Products", "Tips & tricks"
+    ];
+
+    // Query the posts
+    $data = UserPost::where('status', 'approved')
+        ->whereIn('category', $categories)
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->select('category', \DB::raw('count(*) as total'))
+        ->groupBy('category')
+        ->orderBy('category')
+        ->get();
+
+    // Return the data as a JSON response
+    return response()->json($data);
+}
+
+
 
 }

@@ -121,6 +121,10 @@ Route::middleware('auth:sanctum')->get('/posts/{id}/total-likes', [UserPostsCont
 
 // report generation
 Route::middleware('auth:sanctum')->get('/getReport', [ReportController::class, 'getReport']);
+
+Route::middleware('auth:sanctum')->get('/mostCategories', [ReportController::class, 'mostCategories']);  // for pie
+Route::middleware('auth:sanctum')->get('/tableCategories', [ReportController::class, 'tableCategories']); // for table
+
 Route::middleware('auth:sanctum')->get('/userTotalPost', [ReportController::class, 'totalPost']);  // for pie
 Route::middleware('auth:sanctum')->get('/userTotalPosts', [ReportController::class, 'totalPosts']); // for table
 
