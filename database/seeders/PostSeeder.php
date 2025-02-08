@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PostSeeder extends Seeder
 {
@@ -12,107 +13,96 @@ class PostSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('user_posts')->insert([
+        $posts = [
             [
-                'user_id' => 2,
-                'image' => 'reduce-waste.jpg',
-                'title' => 'Reduce Waste: How to Minimize Trash',
-                'content' => 'Learn practical ways to reduce waste in your daily life by minimizing the use of non-recyclable materials and cutting down on disposable products.',
-                'category' => 'paper',
-                'status' => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'user_id' => 2, 
-                'image' => 'reuse-containers.jpg',
-                'title' => 'Reuse Containers: Creative Ways to Reuse Household Items',
-                'content' => 'Discover creative ideas for reusing containers and household items instead of throwing them away. This helps reduce waste and saves money.',
+                'user_id' => 1,
+                'image' => '../storage/images/bottle-art.png',
+                'title' => 'Blossom Bottle Art: Creative Ways to Reuse Plastic Bottles',
+                'content' => 'Maaring gamitin ang mga plastic bottles sa paggawa ng mga creative na art projects. Ito ay isang magandang paraan upang mabawasan ang basura at makatulong sa kalikasan.',
                 'category' => 'plastic',
                 'status' => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'user_id' => 2,
-                'image' => 'recycle-plastics.jpg',
-                'title' => 'Recycle Plastics: The Importance of Proper Sorting',
-                'content' => 'Proper recycling of plastics is essential for reducing pollution. Learn how to sort plastics and ensure they get recycled properly.',
+                'image' => '../storage/images/parol.jpg',
+                'title' => 'Parol for Christmas: Recycled Materials',
+                'content' => 'Tignan itong parol mula sa bote ng mountain dew, maaring gawin parol sa paparating na pasko.',
                 'category' => 'plastic',
                 'status' => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
-                'user_id' => 2,
-                'image' => 'composting-organic-waste.jpg',
+                'user_id' => 3,
+                'image' => '../storage/images/plastic-bottles.jpg',
+                'title' => 'Pag tanim sa mga plastic bottles',
+                'content' => 'Maaari mong gamitin ang mga plastic bottles bilang pots para sa mga halaman. Ito ay isang magandang paraan upang mabawasan ang basura at makatulong sa kalikasan.',
+                'category' => 'plastic',
+                'status' => 'approved',
+            ],
+            [
+                'user_id' => 4,
+                'image' => '../storage/images/plastic-bottle-greenhouse.jpg',
                 'title' => 'Composting: Turning Organic Waste into Valuable Soil',
                 'content' => 'Composting is a great way to reduce organic waste and create nutrient-rich soil for your garden. Learn how to start your own compost pile.',
                 'category' => 'compost',
                 'status' => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
-                'user_id' => 2,
-                'image' => 'sustainable-fashion.jpg',
+                'user_id' => 5,
+                'image' => 'storage/images/sustainable-fashion.jpg',
                 'title' => 'Sustainable Fashion: Reuse and Recycle Clothing',
                 'content' => 'Find out how sustainable fashion can help reduce waste by reusing and recycling clothing, and learn about eco-friendly fashion choices.',
                 'category' => 'miscellaneous',
                 'status' => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
-                'user_id' => 2,
-                'image' => 'upcycling-projects.jpg',
+                'user_id' => 6,
+                'image' => 'storage/images/upcycling-projects.jpg',
                 'title' => 'Upcycling Projects: Turning Trash into Treasure',
                 'content' => 'Explore fun upcycling projects that turn everyday trash into creative and useful items, reducing waste in the process.',
                 'category' => 'rubber',
                 'status' => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
-                'user_id' => 2,
-                'image' => 'water-conservation.jpg',
+                'user_id' => 7,
+                'image' => 'storage/images/water-conservation.jpg',
                 'title' => 'Reduce Water Waste: Conservation Tips',
                 'content' => 'Water is a precious resource. Discover tips for reducing water waste in your home and garden to conserve this essential resource.',
                 'category' => 'miscellaneous',
                 'status' => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
-                'user_id' => 2,
-                'image' => 'recycle-paper.jpg',
-                'title' => 'Recycle Paper: Simple Steps for a Greener Planet',
-                'content' => 'Recycling paper is one of the easiest ways to help the environment. Learn the simple steps you can take to recycle paper effectively.',
+                'user_id' => 8,
+                'image' => '../storage/images/Egg-carton-lamp.jpg',
+                'title' => 'Egg Carton Lamp: Creative Upcycling Project',
+                'content' => 'Create a unique and eco-friendly lamp using an egg carton, maari itong gawin para mag mukhang aesthetic ang dating hindi lang sa maganda ito nakaka tulong pa tayo upang mapakinabangan ang lahat na nasa paligig natin. This upcycling project is a fun way to repurpose old materials and reduce waste.',
                 'category' => 'paper',
                 'status' => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
-                'user_id' => 2,
-                'image' => 'eco-friendly-products.jpg',
-                'title' => 'Reduce and Reuse: Eco-Friendly Products to Try',
-                'content' => 'Switching to eco-friendly products can help reduce waste and encourage reuse. Check out our list of sustainable products worth trying.',
+                'user_id' => 9,
+                'image' => '../storage/images/bottle-case.jpg',
+                'title' => 'Gawing lagayan ng mga gamit ang mga plastic bottles',
+                'content' => 'Maaari mong gamitin ang mga plastic bottles bilang lagayan ng mga gamit tulad ng mga screw, nail, at iba pa. Ito ay isang magandang paraan upang mabawasan ang basura at makatulong sa kalikasan.',
                 'category' => 'plastic',
                 'status' => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
-                'user_id' => 2,
-                'image' => 'recycling-centers.jpg',
+                'user_id' => 10,
+                'image' => 'storage/images/recycling-centers.jpg',
                 'title' => 'Recycling Centers: What You Can and Cannot Recycle',
                 'content' => 'Not everything can be recycled. Learn what you can and cannot recycle at your local recycling center to reduce contamination.',
                 'category' => 'miscellaneous',
                 'status' => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
-        ]);
+        ];
+
+        foreach ($posts as &$post) {
+            // Generate random timestamps within the past year
+            $randomDate = Carbon::now()->subDays(rand(1, 365))->setTime(rand(0, 23), rand(0, 59), rand(0, 59));
+            $post['created_at'] = $randomDate;
+            $post['updated_at'] = $randomDate->copy()->addDays(rand(1, 30));
+        }
+
+        DB::table('user_posts')->insert($posts);
     }
 }
