@@ -329,55 +329,79 @@ class ReportController extends Controller
     }
 
 
-    // Function to fetch category data for the table
-    public function tableCategories(Request $request)
-{
-    // Ensure the user is authenticated
-    $user = auth()->user();
+    // // Function to fetch category data for the table
+    // public function tableCategories(Request $request)
+    // {
+    //     // Ensure the user is authenticated
+    //     $user = auth()->user();
 
-    if (!$user) {
-        return response()->json(['error' => 'Unauthorized'], 401);
+    //     if (!$user) {
+    //         return response()->json(['error' => 'Unauthorized'], 401);
+    //     }
+
+    //     // Get start and end date from the request, default to current month if not provided
+    //     $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
+    //     $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
+
+    //     // Validate date formats (YYYY-MM-DD)
+    //     if (!Carbon::hasFormat($startDate, 'Y-m-d')) {
+    //         return response()->json(['error' => 'Invalid start_date format. Use YYYY-MM-DD'], 400);
+    //     }
+
+    //     if (!Carbon::hasFormat($endDate, 'Y-m-d')) {
+    //         return response()->json(['error' => 'Invalid end_date format. Use YYYY-MM-DD'], 400);
+    //     }
+
+    //     // Parse the dates using Carbon
+    //     try {
+    //         $startDate = Carbon::parse($startDate)->startOfDay(); // Ensure the start date includes all of the day
+    //         $endDate = Carbon::parse($endDate)->endOfDay(); // Ensure the end date includes all of the day
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => 'Invalid date format'], 400);
+    //     }
+
+    //     // Categories to track
+    //     $categories = [
+    //         "Compost", "Plastic", "Rubber", "Wood and Paper", "Glass", "Boxes", "Mixed Waste", "Cloth", "Issues", "Miscellaneous Products", "Tips & tricks"
+    //     ];
+
+    //     // Query the posts
+    //     $data = UserPost::where('status', 'approved')
+    //         ->whereIn('category', $categories)
+    //         ->whereBetween('created_at', [$startDate, $endDate])
+    //         ->select('category', \DB::raw('count(*) as total'))
+    //         ->groupBy('category')
+    //         ->orderBy('category')
+    //         ->get();
+
+    //     // Return the data as a JSON response
+    //     return response()->json($data);
+    // }
+
+    public function tableCategories(Request $request) 
+    {
+        // Get the filter date range from the request (optional)
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        // Query to get total posts by category
+        $query = UserPost::query();
+
+        // Filter by status
+        $query->where('status', 'approved');
+
+
+        // Group by category and count posts, include combined dates
+        $result = $query->select(
+                            'category', 
+                            \DB::raw('COUNT(*) as total_posts'),
+                            
+                        )
+                        ->groupBy('category')
+                        ->get();
+
+        return response()->json($result);
     }
-
-    // Get start and end date from the request, default to current month if not provided
-    $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
-    $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
-
-    // Validate date formats (YYYY-MM-DD)
-    if (!Carbon::hasFormat($startDate, 'Y-m-d')) {
-        return response()->json(['error' => 'Invalid start_date format. Use YYYY-MM-DD'], 400);
-    }
-
-    if (!Carbon::hasFormat($endDate, 'Y-m-d')) {
-        return response()->json(['error' => 'Invalid end_date format. Use YYYY-MM-DD'], 400);
-    }
-
-    // Parse the dates using Carbon
-    try {
-        $startDate = Carbon::parse($startDate)->startOfDay(); // Ensure the start date includes all of the day
-        $endDate = Carbon::parse($endDate)->endOfDay(); // Ensure the end date includes all of the day
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'Invalid date format'], 400);
-    }
-
-    // Categories to track
-    $categories = [
-        "Compost", "Plastic", "Rubber", "Wood and Paper", "Glass", "Boxes", "Mixed Waste", "Cloth", "Issues", "Miscellaneous Products", "Tips & tricks"
-    ];
-
-    // Query the posts
-    $data = UserPost::where('status', 'approved')
-        ->whereIn('category', $categories)
-        ->whereBetween('created_at', [$startDate, $endDate])
-        ->select('category', \DB::raw('count(*) as total'))
-        ->groupBy('category')
-        ->orderBy('category')
-        ->get();
-
-    // Return the data as a JSON response
-    return response()->json($data);
-}
-
 
 
 }

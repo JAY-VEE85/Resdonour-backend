@@ -10,7 +10,7 @@ class UserPost extends Model
     use HasFactory;
 
     protected $primaryKey = 'id';
-    protected $fillable = ['user_id', 'image', 'title', 'content', 'category', 'status', 'badge', 'remarks', 'total_likes']; // Add 'badge'
+    protected $fillable = ['user_id', 'image', 'title', 'content', 'category', 'status', 'badge', 'remarks', 'total_likes', 'created_at']; // Add 'badge'
 
     public function user()
     {
