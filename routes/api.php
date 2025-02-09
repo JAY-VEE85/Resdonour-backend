@@ -51,9 +51,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::delete('/cancel-registration', [AuthController::class, 'cancelRegistration']);
 Route::match(['post', 'delete'],'/cancel-due-refresh', [AuthController::class, 'cancelDueRefresh']);
 
-// forgot password na wala pa sa front
-Route::post('user/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('user/reset-password', [AuthController::class, 'resetPassword']);
+// forgot password
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/verify-token', [AuthController::class, 'verifyToken']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 // user logout
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);

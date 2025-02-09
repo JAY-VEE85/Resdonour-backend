@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 // for emailingz
 use Illuminate\Support\Facades\Mail;
@@ -80,7 +81,8 @@ class AuthController extends Controller
             return response()->json(['error' => 'User not found'], 404);
         }
 
-        $token = Str::random(6);
+        // Generate a random 6-character alphanumeric code
+        $token = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
 
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $request->email],
@@ -98,12 +100,11 @@ class AuthController extends Controller
         ]);
     }
 
-    public function resetPassword(Request $request)
+    public function verifyToken(Request $request)
     {
         $request->validate([
             'token' => 'required',
             'email' => 'required|email|exists:users,email',
-            'password' => 'required|min:8|confirmed',
         ]);
 
         $resetToken = DB::table('password_reset_tokens')
@@ -115,19 +116,119 @@ class AuthController extends Controller
             return response()->json(['error' => 'Invalid or expired token'], 400);
         }
 
-        if (now()->diffInMinutes($resetToken->created_at) > 40) {
+        if (now()->diffInMinutes($resetToken->created_at) > 60) {
             return response()->json(['error' => 'Token has expired'], 400);
         }
 
+        return response()->json(['message' => 'Token is valid']);
+    }
+
+    // without auto login
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'password' => 'required|min:8|confirmed',
+            'token' => 'required', // Ensure the token is provided
+        ]);
+
+        // Find the reset token from the database
+        $resetToken = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('token', $request->token)
+            ->first();
+
+        if (!$resetToken) {
+            return response()->json(['error' => 'Invalid or expired token'], 400);
+        }
+
+        // Check if the token has expired
+        if (now()->diffInMinutes($resetToken->created_at) > 60) {
+            return response()->json(['error' => 'Token has expired'], 400);
+        }
+
+        // Proceed to update the user's password if token is valid
         $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        // Update the password
         $user->password = Hash::make($request->password);
         $user->save();
 
+        // Delete the reset token after password change
         DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
         return response()->json(['message' => 'Password has been reset successfully']);
     }
 
+    // with auto login sa back, ayaw makuha pwede naman pala sa ts lang
+    // public function resetPassword(Request $request)
+    // {
+    //     // Validate the request data
+    //     $request->validate([
+    //         'email' => 'required|email|exists:users,email',
+    //         'password' => 'required|min:8|confirmed',
+    //         'token' => 'required', // Ensure the token is passed in the request
+    //     ]);
+
+    //     // Retrieve the token from the request
+    //     $token = $request->input('token');
+
+    //     // Find the reset token in the database
+    //     $resetToken = DB::table('password_reset_tokens')
+    //         ->where('email', $request->email)
+    //         ->where('token', $token)
+    //         ->first();
+
+    //     // Check if the token is valid
+    //     if (!$resetToken) {
+    //         return response()->json(['error' => 'Invalid or expired token'], 400);
+    //     }
+
+    //     // Check if the token has expired (60 minutes validity)
+    //     if (now()->diffInMinutes($resetToken->created_at) > 60) {
+    //         return response()->json(['error' => 'Token has expired'], 400);
+    //     }
+
+    //     // Proceed with resetting the password
+    //     $user = User::where('email', $request->email)->first();
+    //     if (!$user) {
+    //         return response()->json(['error' => 'User not found'], 404);
+    //     }
+
+    //     // Update the user's password
+    //     $user->password = Hash::make($request->password);
+    //     $user->save();
+
+    //     // Delete the reset token from the database
+    //     DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+    //     // Attempt to log the user in with the new password
+    //     if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+    //         // Get the authenticated user
+    //         $user = Auth::user();
+
+    //         // Check if the user has verified their email
+    //         if (!$user->hasVerifiedEmail()) {
+    //             return response()->json(['error' => 'Please verify your email before logging in.'], 403);
+    //         }
+
+    //         // Generate token if email is verified
+    //         $token = $user->createToken('auth_token')->plainTextToken;
+
+    //         // Return response with token and user info
+    //         return response()->json([
+    //             'message' => 'Password has been reset and login successful',
+    //             'token' => $token,
+    //             'user' => $user,
+    //             'role' => $user->role
+    //         ]);
+    //     } else {
+    //         return response()->json(['error' => 'Login failed, check credentials after reset'], 401);
+    //     }
+    // }
 
     // public function login(Request $request)
     // {
@@ -195,22 +296,17 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        // Check if the user is authenticated
-        $user = Auth::user();
+        Log::info('Logout request received', ['user' => $request->user()]);
 
-        if ($user) {
-            // Revoke all tokens
-            $user->tokens()->delete();
-
-            // Optionally, revoke the current token only
-            // $request->user()->currentAccessToken()->delete();
-
-            return response()->json(['message' => 'Logout successful'], 200);
-        } else {
+        if (!$request->user()) {
             return response()->json(['error' => 'User not authenticated'], 401);
         }
-    }
 
+        // Revoke all tokens
+        $request->user()->tokens()->delete();
+
+        return response()->json(['message' => 'Logout successful'], 200);
+    }
 
     public function index()
     {
