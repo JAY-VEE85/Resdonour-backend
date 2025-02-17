@@ -23,19 +23,19 @@ class AnnouncementController extends Controller
             $imagePath = $request->file('image')->store('announcement', 'public');
         }
     
-        $expiresAt = Carbon::parse($validated['expires_at'])->timezone('UTC'); 
+        // $expiresAt = Carbon::parse($validated['expires_at'])->timezone('UTC'); 
         $currentTime = Carbon::now()->timezone('UTC'); 
     
-        \Log::info('Expires At:', [$expiresAt]);
+        // \Log::info('Expires At:', [$expiresAt]);
         \Log::info('Current Time:', [$currentTime]);
     
-        Announcement::where('expires_at', '<', $currentTime)->delete();
+        // Announcement::where('expires_at', '<', $currentTime)->delete();
     
         $announcement = Announcement::create([
             'title' => $validated['title'],
             'description' => $validated['description'],
             'image' => $imagePath,
-            'expires_at' => $expiresAt, 
+            // 'expires_at' => $expiresAt, 
         ]);
     
         return response()->json($announcement, 201);
