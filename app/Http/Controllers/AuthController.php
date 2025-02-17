@@ -89,9 +89,21 @@ class AuthController extends Controller
             ['token' => $token, 'created_at' => now()]
         );
 
-        Mail::raw("Your password reset token is: {$token}", function ($message) use ($user) {
+        // Get the user's first name
+        $firstName = $user->fname;
+
+        // Email content
+        $subject = "{$token} is your password reset code";
+        $body = "Hello, {$firstName}!\n\n".
+                "We received a request to reset your password. Use the code below to proceed with resetting your password:\n\n".
+                "{$token}\n\n".
+                "If you didn’t request a password reset, please ignore this email or contact our support team immediately.\n\n".
+                "Thank you,\n".
+                "Re’sIt Support Team";
+
+        Mail::raw($body, function ($message) use ($user, $subject) {
             $message->to($user->email)
-                    ->subject('Password Reset Token');
+                    ->subject($subject);
         });
 
         return response()->json([
@@ -162,73 +174,6 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Password has been reset successfully']);
     }
-
-    // with auto login sa back, ayaw makuha pwede naman pala sa ts lang
-    // public function resetPassword(Request $request)
-    // {
-    //     // Validate the request data
-    //     $request->validate([
-    //         'email' => 'required|email|exists:users,email',
-    //         'password' => 'required|min:8|confirmed',
-    //         'token' => 'required', // Ensure the token is passed in the request
-    //     ]);
-
-    //     // Retrieve the token from the request
-    //     $token = $request->input('token');
-
-    //     // Find the reset token in the database
-    //     $resetToken = DB::table('password_reset_tokens')
-    //         ->where('email', $request->email)
-    //         ->where('token', $token)
-    //         ->first();
-
-    //     // Check if the token is valid
-    //     if (!$resetToken) {
-    //         return response()->json(['error' => 'Invalid or expired token'], 400);
-    //     }
-
-    //     // Check if the token has expired (60 minutes validity)
-    //     if (now()->diffInMinutes($resetToken->created_at) > 60) {
-    //         return response()->json(['error' => 'Token has expired'], 400);
-    //     }
-
-    //     // Proceed with resetting the password
-    //     $user = User::where('email', $request->email)->first();
-    //     if (!$user) {
-    //         return response()->json(['error' => 'User not found'], 404);
-    //     }
-
-    //     // Update the user's password
-    //     $user->password = Hash::make($request->password);
-    //     $user->save();
-
-    //     // Delete the reset token from the database
-    //     DB::table('password_reset_tokens')->where('email', $request->email)->delete();
-
-    //     // Attempt to log the user in with the new password
-    //     if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-    //         // Get the authenticated user
-    //         $user = Auth::user();
-
-    //         // Check if the user has verified their email
-    //         if (!$user->hasVerifiedEmail()) {
-    //             return response()->json(['error' => 'Please verify your email before logging in.'], 403);
-    //         }
-
-    //         // Generate token if email is verified
-    //         $token = $user->createToken('auth_token')->plainTextToken;
-
-    //         // Return response with token and user info
-    //         return response()->json([
-    //             'message' => 'Password has been reset and login successful',
-    //             'token' => $token,
-    //             'user' => $user,
-    //             'role' => $user->role
-    //         ]);
-    //     } else {
-    //         return response()->json(['error' => 'Login failed, check credentials after reset'], 401);
-    //     }
-    // }
 
     // public function login(Request $request)
     // {
