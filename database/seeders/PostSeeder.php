@@ -51,7 +51,7 @@ class PostSeeder extends Seeder
                 'image' => 'storage/images/sustainable-fashion.jpg',
                 'title' => 'Sustainable Fashion: Reuse and Recycle Clothing',
                 'content' => 'Find out how sustainable fashion can help reduce waste by reusing and recycling clothing, and learn about eco-friendly fashion choices.',
-                'category' => 'miscellaneous',
+                'category' => 'miscellaneous products',
                 'status' => 'approved',
             ],
             [
@@ -67,7 +67,7 @@ class PostSeeder extends Seeder
                 'image' => 'storage/images/water-conservation.jpg',
                 'title' => 'Reduce Water Waste: Conservation Tips',
                 'content' => 'Water is a precious resource. Discover tips for reducing water waste in your home and garden to conserve this essential resource.',
-                'category' => 'miscellaneous',
+                'category' => 'miscellaneous products',
                 'status' => 'approved',
             ],
             [
@@ -91,7 +91,7 @@ class PostSeeder extends Seeder
                 'image' => 'storage/images/recycling-centers.jpg',
                 'title' => 'Recycling Centers: What You Can and Cannot Recycle',
                 'content' => 'Not everything can be recycled. Learn what you can and cannot recycle at your local recycling center to reduce contamination.',
-                'category' => 'miscellaneous',
+                'category' => 'miscellaneous products',
                 'status' => 'approved',
             ],
         ];
