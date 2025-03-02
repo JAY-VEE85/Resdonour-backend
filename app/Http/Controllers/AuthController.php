@@ -32,8 +32,8 @@ class AuthController extends Controller
             'phone_number' => 'nullable|string|max:20',
             'city' => 'nullable|string|max:255',
             'barangay' => 'nullable|string|max:255',
-            'age' => 'nullable|integer|min:1|max:100',
             'street' => 'nullable|string|max:255', 
+            'birthdate' => 'required|date|before:today',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -48,8 +48,8 @@ class AuthController extends Controller
             'phone_number' => $request->phone_number,
             'city' => $request->city,
             'barangay' => $request->barangay,
-            'age' => $request->age,   
             'street' => $request->street,
+            'birthdate' => $request->birthdate,
             'password' => Hash::make($request->password),
         ]);
         

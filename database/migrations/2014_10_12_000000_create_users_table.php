@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('phone_number');
             $table->string('city');
             $table->string('barangay');
+            $table->string('street');
+            $table->date('birthdate');
             $table->string('role')->default('user');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();

@@ -49,7 +49,7 @@ class UserController extends Controller
                 'city' => 'nullable|string|max:255',
                 'barangay' => 'nullable|string|max:255',
                 'street' => 'required|string',
-                'age' => 'required|integer|min:1|max:120',
+                'birthdate' => 'required|date|before:today',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
