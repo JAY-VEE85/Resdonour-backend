@@ -9,9 +9,11 @@ class LandingPhotos extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['images'];
-
-    protected $casts = [
-        'images' => 'array', // Ensures JSON is handled properly
+    protected $fillable = [
+        'image1', 'content1',
+        'image2', 'content2',
+        'image3', 'content3',
+        'image4', 'content4',
+        'image5', 'content5',
     ];
 }

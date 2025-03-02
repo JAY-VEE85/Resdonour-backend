@@ -84,7 +84,7 @@ class AdminController extends Controller
                 }
             }
         
-            if ($request->has('category') && in_array($request->category, ['Compost', 'Plastic', 'Rubber', 'Wood and Paper', 'Miscellaneous Products'])) {
+            if ($request->has('category') && in_array($request->category, ['Compost', 'Plastic', 'Rubber', 'Wood', 'Miscellaneous Products'])) {
                 $query->where('category', $request->category);
             }
         
@@ -386,123 +386,303 @@ class AdminController extends Controller
 
     // for landing page photos
     public function addphotos(Request $request)
-    {
-        // dd([
-        //     'file_count' => count($request->file('images')),
-        //     'files' => $request->file('images')
-        // ]);
-        
-        $validated = $request->validate([
-            'images' => 'required|array',
-            'images.*' => 'required|image|mimes:jpg,jpeg,png,gif|max:10240',
-        ]);
+    {   
+        try {
+            // Validate request
+            $validated = $request->validate([
+                'image1' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'content1' => 'nullable|string|max:255',
+                'image2' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'content2' => 'nullable|string|max:255',
+                'image3' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'content3' => 'nullable|string|max:255',
+                'image4' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'content4' => 'nullable|string|max:255',
+                'image5' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'content5' => 'nullable|string|max:255'
+            ]);
 
-        $imagesPaths = []; // Array to store file paths
-
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $imagesPaths[] = $image->store('landingphotos', 'public'); // Store each image
+            // Upload images if present
+            $images = [];
+            for ($i = 1; $i <= 5; $i++) {
+                $imageKey = 'image' . $i;
+                if ($request->hasFile($imageKey)) {
+                    $images[$imageKey] = $request->file($imageKey)->store('landing_photos', 'public');
+                } else {
+                    $images[$imageKey] = null;
+                }
             }
+
+            // Store data in database
+            $landing_photos = \App\Models\LandingPhotos::create([
+                'image1' => $images['image1'] ?? null,
+                'content1' => $validated['content1'] ?? null,
+                'image2' => $images['image2'] ?? null,
+                'content2' => $validated['content2'] ?? null,
+                'image3' => $images['image3'] ?? null,
+                'content3' => $validated['content3'] ?? null,
+                'image4' => $images['image4'] ?? null,
+                'content4' => $validated['content4'] ?? null,
+                'image5' => $images['image5'] ?? null,
+                'content5' => $validated['content5'] ?? null,
+            ]);
+
+            // Return JSON response
+            return response()->json([
+                'message' => 'Photos uploaded successfully!',
+                'data' => $landing_photos
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Something went wrong',
+                'message' => $e->getMessage()
+            ], 500);
         }
+    }
 
-        $landing_photos = LandingPhotos::create([
-            'images' => json_encode($imagesPaths) // Store as JSON array
-        ]);
+    public function showlatestphoto()
+    {
+        try {
+            // Retrieve the latest photo entry
+            $latestPhoto = \App\Models\LandingPhotos::latest()->first();
 
-        return response()->json($landing_photos, 201);
+            // Check if there is any photo entry
+            if (!$latestPhoto) {
+                return response()->json([
+                    'message' => 'No photos found.',
+                    'data' => []
+                ], 200);
+            }
+
+            // Define the base URL for storage images
+            $baseURL = url('storage/');
+
+            // Return JSON response with full image URLs
+            return response()->json([
+                'message' => 'Latest photo retrieved successfully!',
+                'data' => [
+                    'id' => $latestPhoto->id,
+                    'image1' => $latestPhoto->image1 ? $baseURL . '/' . $latestPhoto->image1 : null,
+                    'content1' => $latestPhoto->content1 ?? null,
+                    'image2' => $latestPhoto->image2 ? $baseURL . '/' . $latestPhoto->image2 : null,
+                    'content2' => $latestPhoto->content2 ?? null,
+                    'image3' => $latestPhoto->image3 ? $baseURL . '/' . $latestPhoto->image3 : null,
+                    'content3' => $latestPhoto->content3 ?? null,
+                    'image4' => $latestPhoto->image4 ? $baseURL . '/' . $latestPhoto->image4 : null,
+                    'content4' => $latestPhoto->content4 ?? null,
+                    'image5' => $latestPhoto->image5 ? $baseURL . '/' . $latestPhoto->image5 : null,
+                    'content5' => $latestPhoto->content5 ?? null,
+                    'created_at' => $latestPhoto->created_at
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Something went wrong',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function showallphotos()
     {
-        $landingPhotos = LandingPhotos::orderBy('created_at', 'desc')->get();
-        // Fetch all landing photos
-        // $landingPhotos = LandingPhotos::all();
+        try {
+            // Retrieve all photo entries sorted by latest first
+            $photos = \App\Models\LandingPhotos::orderBy('created_at', 'desc')->get();
 
-        // Decode the images JSON array and generate full URLs for each image
-        foreach ($landingPhotos as $photo) {
-            // Decode the images JSON array
-            $images = json_decode($photo->images, true);
-
-            // Generate full URLs for each image
-            if (is_array($images)) {
-                $photo->images = array_map(fn($img) => asset('storage/' . $img), $images);
-            } else {
-                $photo->images = [];
+            // If no previous photos exist, return an empty array (not a 404 error)
+            if ($photos->count() <= 1) {
+                return response()->json([
+                    'message' => 'No previous photos found.',
+                    'data' => [] // Return empty data with 200 status
+                ], 200);
             }
-        }
 
-        // Return the data as a JSON response
-        return response()->json($landingPhotos);
+            // Remove the latest entry
+            $photos = $photos->skip(1)->values();
+
+            // Define the base URL for storage images
+            $baseURL = url('storage/');
+
+            // Format the response data
+            $formattedPhotos = $photos->map(function ($photo) use ($baseURL) {
+                return [
+                    'id' => $photo->id,
+                    'image1' => $photo->image1 ? $baseURL . '/' . $photo->image1 : null,
+                    'content1' => $photo->content1 ?? null,
+                    'image2' => $photo->image2 ? $baseURL . '/' . $photo->image2 : null,
+                    'content2' => $photo->content2 ?? null,
+                    'image3' => $photo->image3 ? $baseURL . '/' . $photo->image3 : null,
+                    'content3' => $photo->content3 ?? null,
+                    'image4' => $photo->image4 ? $baseURL . '/' . $photo->image4 : null,
+                    'content4' => $photo->content4 ?? null,
+                    'image5' => $photo->image5 ? $baseURL . '/' . $photo->image5 : null,
+                    'content5' => $photo->content5 ?? null,
+                    'created_at' => $photo->created_at
+                ];
+            });
+
+            // Return JSON response
+            return response()->json([
+                'message' => 'All photos except the latest retrieved successfully!',
+                'data' => $formattedPhotos
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Something went wrong',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    public function showphotos(Request $request)
+    public function editLatestPhoto(Request $request)
     {
-        $landingPhotos = LandingPhotos::orderBy('created_at', 'desc')->get();
+        try {
+            // Retrieve the latest photo entry
+            $latestPhoto = \App\Models\LandingPhotos::latest()->first();
 
-        foreach ($landingPhotos as $photo) {
-            // Decode the images JSON array
-            $images = json_decode($photo->images, true);
-
-            // Generate full URLs for each image
-            if (is_array($images)) {
-                $photo->images = array_map(fn($img) => asset('storage/' . $img), $images);
-            } else {
-                $photo->images = [];
+            // Check if there is any photo entry
+            if (!$latestPhoto) {
+                return response()->json([
+                    'message' => 'No photos found to edit.',
+                    'data' => []
+                ], 200);
             }
-        }
 
-        return response()->json($landingPhotos, 200);
+            // Validate request
+            $validated = $request->validate([
+                'image1' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'content1' => 'nullable|string|max:255',
+                'image2' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'content2' => 'nullable|string|max:255',
+                'image3' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'content3' => 'nullable|string|max:255',
+                'image4' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'content4' => 'nullable|string|max:255',
+                'image5' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'content5' => 'nullable|string|max:255'
+            ]);
+
+            // Upload new images if present and replace the existing ones
+            for ($i = 1; $i <= 5; $i++) {
+                $imageKey = 'image' . $i;
+                $contentKey = 'content' . $i;
+
+                if ($request->hasFile($imageKey)) {
+                    // Delete the old image if exists
+                    if ($latestPhoto->$imageKey) {
+                        \Storage::disk('public')->delete($latestPhoto->$imageKey);
+                    }
+                    // Store the new image
+                    $latestPhoto->$imageKey = $request->file($imageKey)->store('landing_photos', 'public');
+                }
+
+                // Update content if provided
+                if ($request->filled($contentKey)) {
+                    $latestPhoto->$contentKey = $validated[$contentKey];
+                }
+            }
+
+            // Save the updated entry
+            $latestPhoto->save();
+
+            return response()->json([
+                'message' => 'Latest photo updated successfully!',
+                'data' => $latestPhoto
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Something went wrong',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function deletephoto($id)
     {
-        $landingPhoto = LandingPhotos::find($id);
+        try {
+            // Find the photo entry by ID
+            $photo = \App\Models\LandingPhotos::find($id);
 
-        if (!$landingPhoto) {
-            return response()->json(['message' => 'Photo not found.'], 404);
+            if (!$photo) {
+                return response()->json([
+                    'message' => 'Photo entry not found.',
+                    'data' => null
+                ], 404);
+            }
+
+            // Delete images from storage if they exist
+            for ($i = 1; $i <= 5; $i++) {
+                $imageKey = 'image' . $i;
+                if ($photo->$imageKey) {
+                    \Storage::disk('public')->delete($photo->$imageKey);
+                }
+            }
+
+            // Delete the entry from the database
+            $photo->delete();
+
+            return response()->json([
+                'message' => 'Highlight deleted successfully!',
+                'data' => null
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Something went wrong',
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        $images = json_decode($landingPhoto->images, true);
-
-        // Delete the images from storage
-        foreach ($images as $image) {
-            Storage::disk('public')->delete($image);
-        }
-
-        // Delete the record from the database
-        $landingPhoto->delete();
-
-        return response()->json(['message' => 'Image deleted successfully.'], 200);
     }
 
-    public function deleteAllPhotos(Request $request)
+    public function deleteAllPhotos()
     {
-        $ids = $request->input('ids');  // Get ids from request body
+        try {
+            // Get the latest uploaded entry
+            $latestPhoto = \App\Models\LandingPhotos::latest()->first();
 
-        // Check if ids are provided
-        if (empty($ids)) {
-            return response()->json(['message' => 'No IDs provided'], 400);
-        }
+            if (!$latestPhoto) {
+                return response()->json([
+                    'message' => 'No photos found.',
+                    'data' => null
+                ], 404);
+            }
 
-        // Delete the selected photos based on the IDs (excluding the latest one)
-        foreach ($ids as $id) {
-            $photo = LandingPhotos::find($id);
+            // Get all previous entries excluding the latest
+            $previousPhotos = \App\Models\LandingPhotos::where('id', '!=', $latestPhoto->id)->get();
 
-            if ($photo) {
-                $images = json_decode($photo->images, true);
+            if ($previousPhotos->isEmpty()) {
+                return response()->json([
+                    'message' => 'No previous photos to delete.',
+                    'data' => null
+                ], 404);
+            }
 
-                // Delete the images from storage
-                foreach ($images as $image) {
-                    Storage::disk('public')->delete($image);
+            // Loop through and delete images from storage
+            foreach ($previousPhotos as $photo) {
+                for ($i = 1; $i <= 5; $i++) {
+                    $imageKey = 'image' . $i;
+                    if ($photo->$imageKey) {
+                        \Storage::disk('public')->delete($photo->$imageKey);
+                    }
                 }
-
-                // Delete the record from the database
+                // Delete the database entry
                 $photo->delete();
             }
+
+            return response()->json([
+                'message' => 'All previous photo entries deleted successfully!',
+                'data' => null
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Something went wrong',
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json(['message' => 'Selected images deleted successfully.'], 200);
     }
-
-
 }

@@ -82,8 +82,9 @@ Route::middleware('auth:sanctum')->delete('/deletepost/{id}', [AdminController::
 
 // for landing page photos
 Route::middleware('auth:sanctum')->post('/addphotos', [AdminController::class, 'addphotos']);
-Route::get('/showphotos', [AdminController::class, 'showphotos']); // without auth kasi nasa landing page
+Route::get('/showlatestphoto', [AdminController::class, 'showlatestphoto']); // without auth kasi nasa landing page
 Route::middleware('auth:sanctum')->get('/showallphotos', [AdminController::class, 'showallphotos']);
+Route::middleware('auth:sanctum')->post('/editLatestPhoto', [AdminController::class, 'editLatestPhoto']);
 Route::middleware('auth:sanctum')->delete('/deletephoto/{id}', [AdminController::class, 'deletephoto']);
 Route::middleware('auth:sanctum')->post('/deleteAllPhotos', [AdminController::class, 'deleteAllPhotos']);
 

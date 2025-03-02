@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('landing_photos', function (Blueprint $table) {
             $table->id();
-            $table->json('images');
+            $table->string('image1')->nullable();
+            $table->string('content1')->nullable();
+            $table->string('image2')->nullable();
+            $table->string('content2')->nullable();
+            $table->string('image3')->nullable();
+            $table->string('content3')->nullable();
+            $table->string('image4')->nullable();
+            $table->string('content4')->nullable();
+            $table->string('image5')->nullable();
+            $table->string('content5')->nullable();
             $table->timestamps();
         });
     }
