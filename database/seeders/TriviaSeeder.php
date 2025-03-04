@@ -10,125 +10,96 @@ class TriviaSeeder extends Seeder
     public function run()
     {
         DB::table('trivia_questions')->insert([
+            // Reduce Trivia
             [
-                'question' => 'What do the 3Rs of sustainability stand for?',
-                'correct_answer' => 'Recycle, Reuse, Reduce',
+                'category' => 'Reduce',
+                'title' => 'Plastic pollution',
+                'facts' => 'Every year, about 8 million tons of plastic end up in the ocean. Reducing plastic use helps protect marine life!',
+                'question' => 'How much plastic waste ends up in the ocean every year?',
+                'correct_answer' => '8 million tons',
                 'answers' => json_encode([
-                    'Recycle, Reuse, Reduce',
-                    'Reduce, Renew, Recycle',
-                    'Reuse, Revise, Reduce',
-                    'Recycle, Renew, Refill'
+                    '1 million tons',
+                    '8 million tons',
+                    '6 million tons',
+                    '2 million tons'
                 ]),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => '2025-03-03 04:18:09',
             ],
             [
-                'question' => 'Which material takes the longest to decompose in a landfill?',
-                'correct_answer' => 'Glass bottle',
+                'category' => 'Reduce',
+                'title' => 'Fast fashion waste',
+                'facts' => 'The fashion industry produces 10% of global carbon emissions. Choosing sustainable clothing can help reduce this impact!',
+                'question' => 'What percentage of global carbon emissions does the fashion industry produce?',
+                'correct_answer' => '10%',
                 'answers' => json_encode([
-                    'Plastic bottle',
-                    'Glass bottle',
-                    'Aluminum can',
-                    'Paper'
+                    '5%',
+                    '10%',
+                    '25%',
+                    '50%'
                 ]),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => '2025-03-02 04:18:09',
+            ],
+
+            // Reuse Trivia
+            [
+                'category' => 'Reuse',
+                'title' => 'Plastic bag usage',
+                'facts' => 'A single plastic bag is used for an average of 12 minutes but takes over 500 years to decompose.',
+                'question' => 'How long is a plastic bag typically used before being thrown away?',
+                'correct_answer' => '12 minutes',
+                'answers' => json_encode([
+                    '5 minutes',
+                    '12 minutes',
+                    '1 hour',
+                    '1 day'
+                ]),
+                'created_at' => '2025-03-01 04:18:09',
+            ],
+
+            // Recycle Trivia
+            [
+                'category' => 'Recycle',
+                'title' => 'Paper recycling',
+                'facts' => 'Recycling one ton of paper saves 17 trees, 26,000 liters of water, and 4,000 kWh of electricity.',
+                'question' => 'How many trees can be saved by recycling one ton of paper?',
+                'correct_answer' => '17',
+                'answers' => json_encode([
+                    '5',
+                    '10',
+                    '17',
+                    '25'
+                ]),
+                'created_at' => '2025-02-28 04:18:09',
+            ],
+
+            // Gardening Trivia
+            [
+                'category' => 'Gardening',
+                'title' => 'Trees and oxygen',
+                'facts' => 'A single tree can provide oxygen for up to 4 people per day.',
+                'question' => 'How many people can a single tree provide oxygen for daily?',
+                'correct_answer' => '4',
+                'answers' => json_encode([
+                    '1',
+                    '2',
+                    '4',
+                    '10'
+                ]),
+                'created_at' => '2025-02-27 04:18:09',
             ],
             [
-                'question' => 'How much energy can be saved by recycling one aluminum can?',
-                'correct_answer' => 'Enough to power a TV for 3 hours',
+                'category' => 'Gardening',
+                'title' => 'Companion planting',
+                'facts' => 'Basil and tomatoes grow better together because basil helps repel pests that attack tomatoes!',
+                'question' => 'Which herb helps tomatoes grow better by repelling pests?',
+                'correct_answer' => 'Basil',
                 'answers' => json_encode([
-                    'Enough to power a lightbulb for 1 hour',
-                    'Enough to power a computer for 30 minutes',
-                    'Enough to power a TV for 3 hours',
-                    'Enough to power a fridge for a day'
+                    'Basil',
+                    'Mint',
+                    'Rosemary',
+                    'Cilantro'
                 ]),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'question' => 'What percentage of the world’s waste is recyclable?',
-                'correct_answer' => '75%',
-                'answers' => json_encode([
-                    '50%',
-                    '65%',
-                    '75%',
-                    '80%'
-                ]),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'question' => 'What is the term for turning organic waste like food scraps into nutrient-rich soil?',
-                'correct_answer' => 'Composting',
-                'answers' => json_encode([
-                    'Decomposition',
-                    'Composting',
-                    'Mulching',
-                    'Recycling'
-                ]),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'question' => 'Which of the following items cannot be recycled in most curbside programs?',
-                'correct_answer' => 'Pizza boxes with grease',
-                'answers' => json_encode([
-                    'Cardboard',
-                    'Plastic bottles',
-                    'Pizza boxes with grease',
-                    'Aluminum cans'
-                ]),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'question' => 'What is “upcycling”?',
-                'correct_answer' => 'Recycling materials into higher-quality products',
-                'answers' => json_encode([
-                    'Recycling materials into higher-quality products',
-                    'Biking uphill with sustainable materials',
-                    'Using waste for energy production',
-                    'Reducing the quality of materials for reuse'
-                ]),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'question' => 'Which country is known as the world leader in recycling?',
-                'correct_answer' => 'Germany',
-                'answers' => json_encode([
-                    'Germany',
-                    'Japan',
-                    'Sweden',
-                    'United States'
-                ]),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'question' => 'What is the primary benefit of reducing waste at the source?',
-                'correct_answer' => 'It reduces the amount of material that needs to be recycled or sent to landfills.',
-                'answers' => json_encode([
-                    'It saves time.',
-                    'It eliminates the need for recycling entirely.',
-                    'It reduces the amount of material that needs to be recycled or sent to landfills.',
-                    'It creates new materials.'
-                ]),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'question' => 'How can individuals best contribute to a circular economy?',
-                'correct_answer' => 'By buying reusable products and reducing single-use items',
-                'answers' => json_encode([
-                    'By throwing everything into recycling bins',
-                    'By buying reusable products and reducing single-use items',
-                    'By burning waste materials',
-                    'By only recycling plastics'
-                ]),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => '2025-02-26 04:18:09',
             ],
         ]);
     }

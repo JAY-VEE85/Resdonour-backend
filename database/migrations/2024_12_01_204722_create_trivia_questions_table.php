@@ -13,9 +13,14 @@ return new class extends Migration
     {
         Schema::create('trivia_questions', function (Blueprint $table) {
             $table->id();
-            $table->string('question');
+            $table->string('category'); // (Reduce, Reuse, Recycle, Gardening)
+            $table->string('title');
+            $table->text('facts'); // the trivia mismo
+            $table->string('question'); // about trivia
             $table->string('correct_answer');
             $table->json('answers');
+            $table->integer('correct_count')->default(0); // Count of correct answers
+            $table->integer('wrong_count')->default(0); // Count of wrong answers
             $table->timestamps();
         });
     }

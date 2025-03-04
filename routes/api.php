@@ -120,19 +120,22 @@ Route::middleware('auth:sanctum')->get('/oldestpending', [ReportController::clas
 
 // trivia 
 Route::middleware('auth:sanctum')->prefix('trivia')->group(function () {
-    Route::post('questions', [TriviaQuestionController::class, 'create']);  // admin to
     Route::get('getquestions', [TriviaQuestionController::class, 'index']);   // For users to view all questions
 
     // para kay admin
+    Route::post('questions', [TriviaQuestionController::class, 'create']);
+    Route::get('triviaByID/{id}', [TriviaQuestionController::class, 'getById']);
     Route::put('questions/{id}', [TriviaQuestionController::class, 'update']);
     Route::delete('question/{id}', [TriviaQuestionController::class, 'destroy']); 
 
-    // para sa sagot ni user
-    Route::post('questions/{question_id}/answer', [UserScoreController::class, 'store']);
+    // for user to answer trivia for today (latest kinukuha, bali kahit hindi date today huhu ayusin pa pero lapit na ata)
+    Route::get('triviatoday', [TriviaQuestionController::class, 'getTriviaToday']);
+    Route::post('questions/{id}/answer', [TriviaQuestionController::class, 'submitAnswer']);
+
+    // User score routes
     Route::get('user/score/{id}', [UserScoreController::class, 'getScores']);
     Route::get('alluser/scores', [UserScoreController::class, 'getAllUsersScores']);
     Route::get('user/score', [UserScoreController::class, 'getUserScores']);
-
 });
 
 // badge for users

@@ -9,7 +9,14 @@ class TriviaQuestion extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['question', 'correct_answer', 'answers'];
+    protected $fillable = [
+        'category',
+        'title',
+        'facts',
+        'question', 
+        'correct_answer', 
+        'answers'
+    ];
 
     protected $casts = [
         'answers' => 'array', 
