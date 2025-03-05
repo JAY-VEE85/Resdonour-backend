@@ -41,7 +41,7 @@ class TriviaQuestionController extends Controller
         $todayTrivia = TriviaQuestion::whereDate('created_at', now()->toDateString())->first();
 
         if (!$todayTrivia) {
-            $todayTrivia = TriviaQuestion::latest('created_at')->first(); // Get latest trivia if none for today
+            return response()->json(['message' => 'No trivia created today'], 404);
         }
 
         return response()->json($todayTrivia);
@@ -92,7 +92,13 @@ class TriviaQuestionController extends Controller
         ]);
 
         $user = auth()->user(); // Get authenticated user
-        $trivia = TriviaQuestion::findOrFail($id);
+        $trivia = TriviaQuestion::where('id', $id)
+            ->whereDate('created_at', now()->toDateString()) // ✅ Ensure it's today's trivia
+            ->first();
+
+        if (!$trivia) {
+            return response()->json(['message' => 'Trivia not found or not available today.'], 404);
+        }
 
         // Check if the user has already answered
         $existingAnswer = UserScore::where('user_id', $user->id)
@@ -118,18 +124,14 @@ class TriviaQuestionController extends Controller
         ]);
 
         // ✅ Update correct_count or wrong_count in trivia_questions
-        if ($isCorrect) {
-            $trivia->increment('correct_count');  // Increments the correct_count field by 1
-        } else {
-            $trivia->increment('wrong_count');    // Increments the wrong_count field by 1
-        }
+        $trivia->increment($isCorrect ? 'correct_count' : 'wrong_count');
 
         return response()->json([
             'message' => $isCorrect ? 'Correct answer!' : 'Wrong answer!',
-            'correct' => $isCorrect
+            'correct' => $isCorrect,
+            'correct_answer' => $trivia->correct_answer, // ✅ Include correct answer in response
         ]);
     }
-
 
     public function destroy($id)
     {
