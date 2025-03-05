@@ -10,6 +10,7 @@ use App\Http\Controllers\UserPostsController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\TriviaQuestionController;
 use App\Http\Controllers\UserScoreController;
+use App\Http\Controllers\BarangayPostsController;
 
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\VerifyEmailController;
@@ -152,6 +153,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/announcements/{id}', [AnnouncementController::class, 'show']);
     Route::put('/announcements/{id}', [AnnouncementController::class, 'update']);
     Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy']);
+});
+
+// Barangay Posts (CRUD operations)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/barangay-posts', [BarangayPostsController::class, 'createPost']); // Create a post
+    Route::get('/barangay-posts', [BarangayPostsController::class, 'getAllPosts']); // Get all posts
+    Route::get('/barangay-posts/{id}', [BarangayPostsController::class, 'getPost']); // Get a specific post
+    Route::put('/barangay-posts/{id}', [BarangayPostsController::class, 'updatePost']); // Update a post
+    Route::delete('/barangay-posts/{id}', [BarangayPostsController::class, 'deletePost']); // Delete a post
 });
 
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
