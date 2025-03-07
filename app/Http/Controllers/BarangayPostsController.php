@@ -58,8 +58,14 @@ class BarangayPostsController extends Controller
             return response()->json(['message' => 'Post not found'], 404);
         }
 
+        // Decode images JSON and generate full URLs
+        $barangayPost->images = collect(json_decode($barangayPost->images))->map(function ($image) {
+            return asset('storage/' . $image); // ✅ Convert to full URL
+        })->toArray();
+
         return response()->json($barangayPost);
     }
+
 
     // UPDATE POST
     public function updatePost(Request $request, $id)
@@ -89,6 +95,11 @@ class BarangayPostsController extends Controller
         }
 
         $barangayPost->save();
+
+        // Convert stored image paths to full URLs for response
+        $barangayPost->images = collect(json_decode($barangayPost->images))->map(function ($image) {
+            return asset('storage/' . $image);
+        })->toArray();
 
         return response()->json($barangayPost);
     }

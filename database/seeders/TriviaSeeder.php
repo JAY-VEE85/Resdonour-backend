@@ -99,7 +99,7 @@ class TriviaSeeder extends Seeder
                     'Rosemary',
                     'Cilantro'
                 ]),
-                'created_at' => '2025-02-26 04:18:09',
+                'created_at' => now(),
             ],
         ]);
     }
