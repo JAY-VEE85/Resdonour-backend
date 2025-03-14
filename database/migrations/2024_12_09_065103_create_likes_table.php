@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('likes', function (Blueprint $table) {
+        Schema::create('post_likes', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('post_id');
@@ -16,14 +16,13 @@ return new class extends Migration
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('post_id')->references('id')->on('user_posts')->onDelete('cascade');
-
-            // Ensure no duplicate likes for the same post by the same user
             $table->unique(['user_id', 'post_id']);
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('likes');
+        Schema::dropIfExists('post_likes');
+        Schema::dropIfExists('user_posts');
     }
 };

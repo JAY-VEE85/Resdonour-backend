@@ -51,6 +51,7 @@ class AuthController extends Controller
             'street' => $request->street,
             'birthdate' => $request->birthdate,
             'password' => Hash::make($request->password),
+            // 'badge' => 'Newbie',
         ]);
         
         // Generate a random 6-character alphanumeric code
@@ -63,6 +64,8 @@ class AuthController extends Controller
 
         // Send email verification notification
         event(new Registered($user));
+
+        $user->badge = 'Newbie';
 
         return response()->json([
             'message' => 'Account created successfully. Please verify your email.'
@@ -174,32 +177,6 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Password has been reset successfully']);
     }
-
-    // public function login(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'email' => 'required|string|email',
-    //         'password' => 'required|string|min:8',
-    //     ]);
-
-    //     // para sa validation to ng login renze
-    //     if ($validator->fails()) {
-    //         return response()->json($validator->errors(), 422);
-    //     }
-
-    //     // tas ito naman for attemp makalogin is user
-    //     if (!Auth::attempt($request->only('email', 'password'))) {
-    //         return response()->json(['error' => 'Invalid credentials'], 401);
-    //     }
-
-    //     $user = Auth::user();
-
-    //     // basta token HAHAHHA
-    //     $token = $user->createToken('auth_token')->plainTextToken;
-
-    //     // response if successful
-    //     return response()->json(['message' => 'Login successful', 'token' => $token, 'user' => $user]);
-    // }
 
     public function login(Request $request)
     {

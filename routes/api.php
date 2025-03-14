@@ -35,17 +35,10 @@ Route::apiResource('/posts', App\Http\Controllers\Api\PostController::class);
 Route::get('/email/verify', function (Request $request) {
     return response()->json(['message' => 'Please verify your email']);
 })->name('verification.notice');
-
-// Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, 'verify'])
-// ->middleware(['signed'])
-// ->name('verification.verify');
-
 Route::post('/verify-email-with-code', [VerifyEmailController::class, 'verifyWithCode']);
-
-// send new email verification code
 Route::post('/email/resend', [VerifyEmailController::class, 'resendVerificationCode']);
 
-// User login/Register
+// user login/register
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/users', [AuthController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -66,20 +59,22 @@ Route::middleware('auth:sanctum')->put('/update', [UserController::class, 'updat
 Route::middleware('auth:sanctum')->post('/verify-current-password', [UserController::class, 'verifyCurrentPassword']);
 Route::middleware('auth:sanctum')->post('/change-password', [UserController::class, 'changePassword']);
 
-// user post
-Route::middleware('auth:sanctum')->post('/post', [UserPostsController::class, 'posts']); 
+// posts route for user side
+Route::middleware('auth:sanctum')->post('/post', [UserPostsController::class, 'createPost']); 
 Route::middleware('auth:sanctum')->get('/post/{id}', [UserPostsController::class, 'getPost']);
-Route::middleware('auth:sanctum')->get('/getUserPosts', [UserPostsController::class, 'getUserPosts']);
+Route::middleware('auth:sanctum')->get('/getUserPosts', [UserPostsController::class, 'getUserPosts']); // user posts
 Route::middleware('auth:sanctum')->post('/updatepost/{id}', [UserPostsController::class, 'updatePost']);
 Route::middleware('auth:sanctum')->delete('/userdeletepost/{id}', [UserPostsController::class, 'deletePost']);
+Route::middleware('auth:sanctum')->get('/all-posts', [UserPostsController::class, 'getAllPosts']); // all users posts
+Route::middleware('auth:sanctum')->get('/liked-posts', [UserPostsController::class, 'getLikedPosts']); // user liked posts
+Route::middleware('auth:sanctum')->post('/posts/{postId}/report', [UserPostsController::class, 'reportPost']); // reporting user posts //
 
-// all post for user
-Route::middleware('auth:sanctum')->get('/posts', [UserPostsController::class, 'getAllPosts']);
-
-// all post for admin
+// posts route for admin side
 Route::middleware('auth:sanctum')->get('/allPost', [AdminController::class, 'allPost']);
 Route::middleware('auth:sanctum')->get('/userpost/{id}', [AdminController::class, 'getPost']);
-Route::middleware('auth:sanctum')->delete('/deletepost/{id}', [AdminController::class, 'deletePost']);
+Route::middleware('auth:sanctum')->put('/removepost/{id}', [AdminController::class, 'softDeletePost']);
+Route::middleware('auth:sanctum')->get('/allReportedPosts', [AdminController::class, 'allReportedPosts']);
+// mag add view removed post then pwede nila idiretso delete don
 
 // for landing page photos
 Route::middleware('auth:sanctum')->post('/addphotos', [AdminController::class, 'addphotos']);
@@ -89,35 +84,26 @@ Route::middleware('auth:sanctum')->post('/editLatestPhoto', [AdminController::cl
 Route::middleware('auth:sanctum')->delete('/deletephoto/{id}', [AdminController::class, 'deletephoto']);
 Route::middleware('auth:sanctum')->post('/deleteAllPhotos', [AdminController::class, 'deleteAllPhotos']);
 
-// approval para sa admins(agri and admin)
-Route::middleware('auth:sanctum')->patch('/post/{id}/approve', [AdminController::class, 'approvePost']);
-Route::middleware('auth:sanctum')->patch('/post/{id}/decline', [AdminController::class, 'declinePost']);
-
-// for pending, approved and declined post
-Route::middleware('auth:sanctum')->get('/totalusers', [AdminController::class, 'totalUsers']);
-Route::middleware('auth:sanctum')->get('/totalPosts', [AdminController::class, 'totalPosts']);
-Route::middleware('auth:sanctum')->get('/totalPendings', [AdminController::class, 'totalPendings']);
-Route::middleware('auth:sanctum')->get('/totalApproved', [AdminController::class, 'totalApproved']);
-Route::middleware('auth:sanctum')->get('/totalDeclined', [AdminController::class, 'totalDeclined']);
+// for admin dashboard
+Route::middleware('auth:sanctum')->get('/dashboardStatistics', [AdminController::class, 'dashboardStatistics']);
+Route::middleware('auth:sanctum')->get('/most-active-users', [ReportController::class, 'getMostActiveUsers']);
+Route::middleware('auth:sanctum')->get('/most-liked-posts', [ReportController::class, 'getMostLikedPosts']);
+Route::middleware('auth:sanctum')->get('/tableCategories', [ReportController::class, 'tableCategories']);
+Route::middleware('auth:sanctum')->get('/chartMaterials', [ReportController::class, 'chartMaterials']);
 
 // likedpost of each user
-Route::middleware('auth:sanctum')->post('/post/{id}/like', [UserPostsController::class, 'toggleLikePost']);
-Route::middleware('auth:sanctum')->get('/user/liked-posts', [UserPostsController::class, 'getLikedPosts']);
-Route::middleware('auth:sanctum')->get('/posts/{id}/total-likes', [UserPostsController::class, 'getTotalLikesForPosts']);
+Route::middleware('auth:sanctum')->post('/posts/{id}/toggle-like', [UserPostsController::class, 'toggleLike']);
+Route::middleware('auth:sanctum')->get('/posts/{id}/total-likes', [UserPostsController::class, 'getTotalLikes']);
+// add view liked posts ni user
 
 // report generation
-Route::middleware('auth:sanctum')->get('/getReport', [ReportController::class, 'getReport']);
+// Route::middleware('auth:sanctum')->get('/getReport', [ReportController::class, 'getReport']);
 
-Route::middleware('auth:sanctum')->get('/mostCategories', [ReportController::class, 'mostCategories']);  // for pie
-Route::middleware('auth:sanctum')->get('/tableCategories', [ReportController::class, 'tableCategories']); // for table
-
-Route::middleware('auth:sanctum')->get('/userTotalPost', [ReportController::class, 'totalPost']);  // for pie
-Route::middleware('auth:sanctum')->get('/userTotalPosts', [ReportController::class, 'totalPosts']); // for table
-
-Route::middleware('auth:sanctum')->get('/likechart', [ReportController::class, 'totalLike']); // for pie
-Route::middleware('auth:sanctum')->get('/liketable', [ReportController::class, 'topliked']); // for pie
-
-Route::middleware('auth:sanctum')->get('/oldestpending', [ReportController::class, 'oldestPending']);
+// for report tab
+Route::middleware('auth:sanctum')->get('/materialsCount', [ReportController::class, 'getMaterialsCount']);
+Route::middleware('auth:sanctum')->get('/mostCategories', [ReportController::class, 'mostCategories']);
+Route::middleware('auth:sanctum')->get('/topUsers', [ReportController::class, 'getUserStats']);
+Route::middleware('auth:sanctum')->get('/topLiked', [ReportController::class, 'get20MostLikedPosts']);
 
 // trivia 
 Route::middleware('auth:sanctum')->prefix('trivia')->group(function () {
@@ -129,21 +115,21 @@ Route::middleware('auth:sanctum')->prefix('trivia')->group(function () {
     Route::put('questions/{id}', [TriviaQuestionController::class, 'update']);
     Route::delete('question/{id}', [TriviaQuestionController::class, 'destroy']); 
 
-    // for user to answer trivia for today (latest kinukuha, bali kahit hindi date today huhu ayusin pa pero lapit na ata)
+    // for user to answer trivia for today
     Route::get('triviatoday', [TriviaQuestionController::class, 'getTriviaToday']);
     Route::post('questions/{id}/answer', [TriviaQuestionController::class, 'submitAnswer']);
 
-    // User score routes
+    // user score routes
     Route::get('user/score/{id}', [UserScoreController::class, 'getScores']);
     Route::get('alluser/scores', [UserScoreController::class, 'getAllUsersScores']);
     Route::get('user/score', [UserScoreController::class, 'getUserScores']);
 });
 
 // badge for users
-Route::middleware('auth:sanctum')->get('/user/{id}/award-badge', [AdminController::class, 'awardBadge']);
-Route::middleware('auth:sanctum')->post('/user/{id}/remove-badge', [AdminController::class, 'removeBadge']);
+// Route::middleware('auth:sanctum')->get('/user/{id}/award-badge', [AdminController::class, 'awardBadge']);
+// Route::middleware('auth:sanctum')->post('/user/{id}/remove-badge', [AdminController::class, 'removeBadge']);
 
-// for announcement users
+// for announcement users view
 Route::middleware('auth:sanctum')->get('/user/announcements', [UserPostsController::class, 'getAnnouncements']);
 
 // for announcement admin
@@ -164,6 +150,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/barangay-posts/{id}', [BarangayPostsController::class, 'deletePost']); // Delete a post
 });
 
+// users tab
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
 Route::middleware('auth:sanctum')->delete('/delete/user', [UserController::class, 'destroy']);
 

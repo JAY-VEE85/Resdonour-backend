@@ -10,7 +10,6 @@ class CreateAnnouncementsTable extends Migration
     {
         Schema::create('announcements', function (Blueprint $table) {
             $table->id();
-            $table->date('date');
             $table->string('image')->nullable(); 
             $table->string('title');
             $table->text('description'); 

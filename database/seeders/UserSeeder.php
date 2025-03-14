@@ -59,6 +59,20 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
+            'fname' => 'CJ',
+            'lname' => 'Arellano',
+            'email' => 'zarinajeyn@gmail.com',
+            'phone_number' => '+63 967-210-7127',
+            'city' => 'Olongapo City',
+            'barangay' => 'Gordon Heights',
+            'street' => 'Blk #12 Ipil-Ipil St. (Long Rd, Upper)',
+            'birthdate' => '2003-02-05',
+            'email_verified_at' => '2025-02-02 04:18:09',
+            'role' => 'user',
+            'password' => Hash::make('Arellano123!'),
+        ]);
+
+        User::create([
             'fname' => 'John Mark',
             'lname' => 'Pintol',
             'email' => 'johnmarkpintol031@gmail.com',

@@ -17,7 +17,6 @@ class UserController extends Controller
 
     public function getUser(Request $request)
     {
-
         $user = Auth::user();
 
         if (!$user) {
@@ -68,58 +67,6 @@ class UserController extends Controller
         ], 200);
     }
 
-
-
-    // public function update(Request $request)
-    // {
-
-    //     $user = Auth::user();
-
-    //     if (!$user) {
-    //         return response()->json(['message' => 'Unauthorized'], 401);
-    //     }
-
-    //     $request->validate([
-    //         'fname' => 'required|string|max:255',
-    //         'lname' => 'required|string|max:255',
-    //         'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-    //         'phone_number' => 'nullable|string|max:15',
-    //         'city' => 'nullable|string|max:255',
-    //         'barangay' => 'nullable|string|max:255',
-    //         'street' => 'required|string', // Street validation
-    //         'age' => 'required|integer|min:1|max:120', // Age validation
-    //     ]);
-
-    //     // if ($request->filled('currentPassword')) {
-    //     //     if (!Hash::check($request->input('currentPassword'), $user->password)) {
-    //     //         return response()->json(['message' => 'Current password is incorrect'], 400);
-    //     //     }
-
-    //     //     if ($request->filled('password')) {
-    //     //         $user->password = Hash::make($request->input('password'));
-    //     //     }
-    //     // }
-
-    //     // $user->fname = $request->input('fname');
-    //     // $user->lname = $request->input('lname');
-    //     // $user->email = $request->input('email');
-    //     // $user->phone_number = $request->input('phone_number');
-    //     // $user->city = $request->input('city');
-    //     // $user->barangay = $request->input('barangay');
-    //     // $user->street = $request->input('street');
-    //     // $user->age = $request->input('age');
-
-    //     // if ($request->filled('password')) {
-    //     //     $user->password = Hash::make($request->input('password'));
-    //     // }
-
-    //     // $user->save();
-
-    //     return response()->json([
-    //         'message' => 'User information updated successfully!'
-    //     ], 200);
-    // }
-
     public function verifyCurrentPassword(Request $request)
     {
         $user = auth()->user(); 
@@ -146,10 +93,11 @@ class UserController extends Controller
         return response()->json(['message' => 'Password changed successfully.'], 200);
     }
 
+    // admin
     public function index(Request $request)
     {
-        $users = User::all();  // Retrieve all users from the database
-        return response()->json($users);  // Return users as JSON
+        $users = User::all();
+        return response()->json($users);
     }
 
     public function destroy(Request $request)
@@ -174,5 +122,4 @@ class UserController extends Controller
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
     }
-
 }

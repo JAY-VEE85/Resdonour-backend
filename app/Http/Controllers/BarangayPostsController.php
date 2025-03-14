@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\BarangayPost;
+use Illuminate\Support\Facades\Storage;
+
 
 class BarangayPostsController extends Controller
 {
@@ -67,41 +69,44 @@ class BarangayPostsController extends Controller
     }
 
 
-    // UPDATE POST
+    // UPDATE POST - ayaw gumana
     public function updatePost(Request $request, $id)
     {
-        $barangayPost = BarangayPost::find($id);
-
-        if (!$barangayPost) {
-            return response()->json(['message' => 'Post not found'], 404);
+        $post = BarangayPost::find($id);
+        if (!$post) {
+            return response()->json(['error' => 'Post not found'], 404);
         }
 
-        $validated = $request->validate([
-            'caption' => 'sometimes|string|max:255',
-            'images' => 'sometimes|array',
-            'images.*' => 'image|mimes:jpg,jpeg,png,gif|max:10240',
-        ]);
-
-        if ($request->hasFile('images')) {
-            $imagePaths = [];
-            foreach ($request->file('images') as $image) {
-                $imagePaths[] = $image->store('brgy_images', 'public');
-            }
-            $barangayPost->images = json_encode($imagePaths);
-        }
-
+        // ✅ Update caption only if provided
         if ($request->has('caption')) {
-            $barangayPost->caption = $request->caption;
+            $post->caption = $request->input('caption');
         }
 
-        $barangayPost->save();
+        // ✅ Handle image uploads
+        if ($request->hasFile('images')) {
+            $images = [];
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('barangay_posts', 'public');
+                $images[] = $path;
+            }
+            $post->images = json_encode($images); // ✅ Store image paths
+        }
 
-        // Convert stored image paths to full URLs for response
-        $barangayPost->images = collect(json_decode($barangayPost->images))->map(function ($image) {
-            return asset('storage/' . $image);
-        })->toArray();
+        // ✅ Handle removed images
+        if ($request->has('removedImages')) {
+            foreach ($request->input('removedImages') as $image) {
+                $imagePath = str_replace(asset('storage/'), '', $image);
+                \Storage::delete('public/' . $imagePath);
+            }
+        }
 
-        return response()->json($barangayPost);
+        // ✅ Save updated post
+        $post->save();
+
+        return response()->json([
+            'message' => 'Post updated successfully',
+            'post' => $post
+        ]);
     }
 
     // DELETE POST
