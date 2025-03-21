@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Storage;
 
 class UserPostsController extends Controller
 {
@@ -53,38 +54,49 @@ class UserPostsController extends Controller
         return response()->json(['message' => 'Post created successfully', 'post' => $post]);
     }
 
-    // uulitin
-    public function updatePost(Request $request, $id) 
+    public function updatePost(Request $request, $id)
     {
-        // return $request->input('title');
-        // Validation rules
-        $validated = $request->validate([
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $post = UserPost::find($id);
+
+        if (!$post) {
+            return response()->json(['error' => 'Post not found'], 404);
+        }
+
+        if ($post->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Forbidden'], 403);
+        }
+
+        $request->validate([
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'category' => 'required|string|max:255',  // Ensuring category is validated correctly
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'category' => 'required|string|max:100',
+            'materials' => 'nullable|array',
+            'materials.*' => 'string|max:255'
         ]);
-        
-    
-        try {
-            $post = UserPost::findOrFail($id);
-    
-            $post->title = $request->title;
-            $post->content = $request->content;
-            $post->category = $request->category;
-    
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $path = $image->store('images', 'public');
-                $post->image = $path;
+
+        // **Only update the image if a new one is uploaded**
+        if ($request->hasFile('image')) {
+            // Delete the old image if it exists
+            if ($post->image) {
+                Storage::disk('public')->delete($post->image);
             }
-    
-            $post->save();
-    
-            return response()->json(['message' => 'Post updated successfully!']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
+            $imagePath = $request->file('image')->store('images', 'public');
+            $post->image = $imagePath;
         }
+
+        $post->title = $request->input('title');
+        $post->content = $request->input('content');
+        $post->category = $request->input('category');
+        $post->materials = $request->has('materials') ? json_encode($request->input('materials')) : json_encode([]);
+
+        $post->save();
+
+        return response()->json(['message' => 'Post updated successfully', 'post' => $post]);
     }
 
     // get post by id
@@ -111,6 +123,7 @@ class UserPostsController extends Controller
             'title' => $post->title,
             'content' => $post->content,
             'category' => $post->category,
+            'materials' => $post->materials,
             'image' => asset('storage/' . $post->image),
             'status' => $post->status,
             'remarks' => $post->remarks,
@@ -294,6 +307,7 @@ class UserPostsController extends Controller
                 'user_posts.id',
                 'user_posts.title',
                 'user_posts.category',
+                'user_posts.materials',
                 DB::raw("CONCAT(users.fname, ' ', users.lname) as user_name"),
                 DB::raw("CONCAT('" . URL::to('/') . "/storage/', user_posts.image) as image"),
                 'user_posts.content',
