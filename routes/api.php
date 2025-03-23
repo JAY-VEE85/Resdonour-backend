@@ -1,9 +1,8 @@
 <?php
 
 use App\Http\Controllers\AdminController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\VerifyEmailController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserPostsController;
@@ -12,8 +11,11 @@ use App\Http\Controllers\TriviaQuestionController;
 use App\Http\Controllers\UserScoreController;
 use App\Http\Controllers\BarangayPostsController;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use App\Http\Controllers\VerifyEmailController;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -153,7 +155,6 @@ Route::middleware('auth:sanctum')->group(function () {
 // users tab
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
 Route::middleware('auth:sanctum')->delete('/delete/user', [UserController::class, 'destroy']);
-
 
 // backend done, modif nalang if need hehe
 

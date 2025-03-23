@@ -24,33 +24,41 @@ class UserPostsController extends Controller
         if (!auth()->check()) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-    
+
         $request->validate([
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,MOV,avi,mkv|max:51200',
             'title' => 'required|string|max:255',
-            'content' => 'required|string',
+            'content' => 'required|string|max:11000',
             'category' => 'required|string|max:100',
             'materials' => 'nullable|array',
             'materials.*' => 'string|max:255'
         ]);
-    
+
+        $filePath = null;
+
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('images', 'public'); 
+            $file = $request->file('image');
+            $extension = $file->getClientOriginalExtension();
+
+            // Store in different directories based on file type
+            if (in_array($extension, ['jpeg', 'png', 'jpg', 'gif'])) {
+                $filePath = $file->store('images', 'public');
+            } elseif (in_array($extension, ['mp4', 'mov', 'MOV', 'avi', 'mkv'])) {
+                $filePath = $file->store('videos', 'public');
+            }
         }
-    
+
         $post = new UserPost();
-        $post->user_id = auth()->id(); 
-        $post->image = isset($imagePath) ? $imagePath : null; 
+        $post->user_id = auth()->id();
+        $post->image = $filePath; // Now supports both images & videos
         $post->title = $request->input('title');
         $post->content = $request->input('content');
         $post->category = $request->input('category');
-
         $post->materials = $request->has('materials') ? json_encode($request->input('materials')) : json_encode([]);
-
         $post->status = 'posted';
 
         $post->save();
-    
+
         return response()->json(['message' => 'Post created successfully', 'post' => $post]);
     }
 
@@ -71,7 +79,7 @@ class UserPostsController extends Controller
         }
 
         $request->validate([
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,MOV,avi,mkv|max:51200',
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'category' => 'required|string|max:100',
@@ -79,14 +87,24 @@ class UserPostsController extends Controller
             'materials.*' => 'string|max:255'
         ]);
 
-        // **Only update the image if a new one is uploaded**
+        // Handle file upload
         if ($request->hasFile('image')) {
-            // Delete the old image if it exists
+            // Delete the old file if exists
             if ($post->image) {
                 Storage::disk('public')->delete($post->image);
             }
-            $imagePath = $request->file('image')->store('images', 'public');
-            $post->image = $imagePath;
+
+            $file = $request->file('image');
+            $extension = $file->getClientOriginalExtension();
+
+            // Store based on file type
+            if (in_array($extension, ['jpeg', 'png', 'jpg', 'gif'])) {
+                $filePath = $file->store('images', 'public');
+            } elseif (in_array($extension, ['mp4', 'mov', 'MOV', 'avi', 'mkv'])) {
+                $filePath = $file->store('videos', 'public');
+            }
+
+            $post->image = $filePath;
         }
 
         $post->title = $request->input('title');
@@ -124,7 +142,8 @@ class UserPostsController extends Controller
             'content' => $post->content,
             'category' => $post->category,
             'materials' => $post->materials,
-            'image' => asset('storage/' . $post->image),
+            'image' => $post->image ? asset('storage/' . $post->image) : null,
+            'image_type' => $post->image ? (preg_match('/\.(mp4|mov|avi|wmv|flv)$/i', $post->image) ? 'video' : 'image') : null,
             'status' => $post->status,
             'remarks' => $post->remarks,
             'report_count' => $post->report_count,
@@ -171,7 +190,8 @@ class UserPostsController extends Controller
             ->withTrashed() // Include soft-deleted posts
             ->get()
             ->map(function ($post) {
-                $post->image = url('storage/' . $post->image);
+                $post->image = $post->image ? url('storage/' . $post->image) : null;
+                $post->image_type = $post->image ? (preg_match('/\.(mp4|mov|avi|wmv|flv)$/i', $post->image) ? 'video' : 'image') : null;
                 return $post;
             });
 
@@ -204,7 +224,8 @@ class UserPostsController extends Controller
                 'title' => $post->title,
                 'content' => $post->content,
                 'category' => $post->category,
-                'image' => asset('storage/' . $post->image), // Convert image to full URL
+                'image' => $post->image ? asset('storage/' . $post->image) : null, // Convert image/video to full URL
+                'image_type' => $post->image ? (preg_match('/\.(mp4|mov|avi|wmv|flv)$/i', $post->image) ? 'video' : 'image') : null, // Detect file type
                 'status' => $post->status,
                 'total_likes' => $post->total_likes,
                 'liked_by_user' => DB::table('post_likes')
@@ -298,6 +319,7 @@ class UserPostsController extends Controller
     public function getLikedPosts()
     {
         $userId = Auth::id(); // Get logged-in user ID
+
         $likedPosts = \DB::table('post_likes')
             ->join('user_posts', 'post_likes.post_id', '=', 'user_posts.id')
             ->join('users', 'user_posts.user_id', '=', 'users.id')
@@ -307,15 +329,22 @@ class UserPostsController extends Controller
                 'user_posts.id',
                 'user_posts.title',
                 'user_posts.category',
-                'user_posts.materials',
-                DB::raw("CONCAT(users.fname, ' ', users.lname) as user_name"),
-                DB::raw("CONCAT('" . URL::to('/') . "/storage/', user_posts.image) as image"),
                 'user_posts.content',
                 'user_posts.total_likes',
                 'user_posts.created_at',
-                'post_likes.created_at as liked_at'
+                'post_likes.created_at as liked_at',
+                DB::raw("CONCAT(users.fname, ' ', users.lname) as user_name"),
+                'user_posts.image'
             )
-            ->get();
+            ->get()
+            ->map(function ($post) {
+                $post->image = $post->image ? asset('storage/' . $post->image) : null;
+                $post->image_type = $post->image 
+                    ? (preg_match('/\.(mp4|mov|avi|wmv|flv)$/i', $post->image) ? 'video' : 'image') 
+                    : null;
+
+                return $post;
+            });
 
         return response()->json([
             'liked_posts' => $likedPosts
