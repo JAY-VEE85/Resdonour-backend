@@ -122,14 +122,12 @@ class UserPostsController extends Controller
     {
         $userId = auth()->id(); // Get the logged-in user ID
 
-        // Retrieve the post, including soft-deleted ones
         $post = UserPost::withTrashed()->with('user')->find($postId);
 
         if (!$post) {
             return response()->json(['message' => 'Post not found'], 404);
         }
 
-        // Restrict access: Only allow users to view their own removed posts
         if ($post->status === 'removed' && $post->user_id !== $userId) {
             return response()->json(['message' => 'You are not authorized to view this post'], 403);
         }
@@ -159,23 +157,6 @@ class UserPostsController extends Controller
             // 'permanent_deletion_date' => $post->deleted_at ? $post->deleted_at->addDays(7)->format('Y-m-d H:i:s') : null,
         ]);
     }
-
-    // GET ALL USER POSTS
-    // public function getUserPosts()
-    // {
-    //     $user = auth()->user();
-
-    //     if (!$user) {
-    //         return response()->json(['error' => 'Unauthorized'], 401);
-    //     }
-
-    //     $posts = $user->posts->map(function ($post) {
-    //         $post->image = url('storage/' . $post->image); 
-    //         return $post;
-    //     });
-
-    //     return response()->json(['posts' => $posts], 200);
-    // }
 
     // final get logged in user posts
     public function getUserPosts()
@@ -266,7 +247,7 @@ class UserPostsController extends Controller
         return response()->json(['message' => 'Post permanently deleted'], 200);
     }
 
-    // likes
+    // toggle like post
     public function toggleLike(Request $request, $postId)
     {
         $user = auth()->user();

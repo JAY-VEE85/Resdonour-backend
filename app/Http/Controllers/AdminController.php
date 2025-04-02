@@ -7,7 +7,9 @@ use App\Models\UserPost;
 use App\Models\User;
 use App\Models\LandingPhotos;
 use App\Models\BarangayPost;
+
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
@@ -59,6 +61,7 @@ class AdminController extends Controller
                 'created_at' => $post->created_at,
                 'category' => $post->category,
                 'materials' => $post->materials,
+                'title' => $post->title,
                 'status' => $post->status,
                 'fname' => $post->user->fname ?? 'N/A',
                 'lname' => $post->user->lname ?? 'N/A',
@@ -69,34 +72,46 @@ class AdminController extends Controller
     }
 
     // admin view post
-    public function getPost($id)
+    public function getPost($postId)
     {
-        $user = auth()->user();
+        $user = auth()->user(); // Get the authenticated user
+        $userId = $user->id;
 
-        // Only allow access for 'admin' and 'agri' roles
         if (!in_array($user->role, ['admin', 'agri'])) {
             return response()->json([
                 'message' => 'Access denied. Admins and Agri users only.'
             ], 403);
         }
 
-        $post = UserPost::with('user')->find($id); // Include user details
+        $post = UserPost::withTrashed()->with('user')->find($postId);
 
         if (!$post) {
-            return response()->json([
-                'message' => 'Post not found.'
-            ], 404);
+            return response()->json(['message' => 'Post not found'], 404);
         }
 
-        // Fetch total likes
-        $totalLikes = $post->likes()->count();
+        if ($post->status === 'removed' && $post->user_id !== $userId) {
+            return response()->json(['message' => 'You are not authorized to view this post'], 403);
+        }
 
         return response()->json([
-            'post' => $post,
-            'image' => asset('storage/' . $post->image), // Convert image path to full URL
-            'total_likes' => $totalLikes,
-            'fname' => $post->user->fname ?? 'N/A', // Include first name
-            'lname' => $post->user->lname ?? 'N/A'  // Include last name
+            'id' => $post->id,
+            'user_id' => $post->user_id,
+            'user_name' => $post->user ? $post->user->fname . ' ' . $post->user->lname : 'Unknown',
+            'title' => $post->title,
+            'content' => $post->content,
+            'category' => $post->category,
+            'materials' => $post->materials,
+            'image' => $post->image ? asset('storage/' . $post->image) : null,
+            'image_type' => $post->image ? (preg_match('/\.(mp4|mov|avi|wmv|flv)$/i', $post->image) ? 'video' : 'image') : null,
+            'status' => $post->status,
+            'remarks' => $post->remarks,
+            'report_count' => $post->report_count,
+            'report_reasons' => $post->report_reasons,
+            'report_remarks' => $post->report_remarks,
+            'total_likes' => $post->total_likes,
+            'liked_by_user' => $post->likes()->where('user_id', $userId)->exists(),
+            'created_at' => $post->created_at->format('Y-m-d H:i:s'),
+            'deleted_at' => $post->deleted_at ? $post->deleted_at->format('Y-m-d H:i:s') : null,
         ]);
     }
 
@@ -142,7 +157,7 @@ class AdminController extends Controller
         }
 
         $posts = UserPost::with('user')
-            ->where('status', 'reported') // Filter only reported posts
+            ->where('status', 'reported')
             ->get()
             ->map(function ($post) {
                 return [
@@ -204,7 +219,6 @@ class AdminController extends Controller
     public function addphotos(Request $request)
     {   
         try {
-            // Validate request
             $validated = $request->validate([
                 'image1' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                 'content1' => 'nullable|string|max:255',
@@ -243,7 +257,6 @@ class AdminController extends Controller
                 'content5' => $validated['content5'] ?? null,
             ]);
 
-            // Return JSON response
             return response()->json([
                 'message' => 'Photos uploaded successfully!',
                 'data' => $landing_photos

@@ -85,14 +85,14 @@ class ReportController extends Controller
         ]);
     }
 
-    // dashboard bar chart - most talked-about issues
+    // dashboard bar chart - most posted materials
     public function chartMaterials() 
     {
         $currentYear = Carbon::now()->year;
 
         $materials = [
             'Compost', 'Plastic', 'Rubber', 'Wood', 'Paper', 'Glass', 'Boxes', 
-            'Mixed Waste', 'Cloth', 'Miscellaneous Products', 'Tips & Tricks', 'Issues'
+            'Mixed Waste', 'Cloth', 'Miscellaneous Products'
         ];
 
         $counts = [];
@@ -100,7 +100,6 @@ class ReportController extends Controller
             ->whereYear('created_at', $currentYear)
             ->count(); // Get total posts for the year
 
-        // Count occurrences of each material
         foreach ($materials as $material) {
             $counts[] = [
                 'materials' => $material,
@@ -117,10 +116,9 @@ class ReportController extends Controller
         ]);
     }
 
-    // dashboard bar chart - most talked-about categories
+    // dashboard bar chart - most posted categories
     public function tableCategories() 
     {
-        // Get the current year
         $currentYear = Carbon::now()->year;
 
         $categoryAnalytics = UserPost::whereIn('status', ['posted', 'reported'])
@@ -148,12 +146,10 @@ class ReportController extends Controller
 
         $counts = [];
 
-        // Count occurrences of each material
         foreach ($materials as $material) {
             $counts[$material] = UserPost::whereJsonContains('materials', $material)->count();
         }
 
-        // Sort by count in descending order
         arsort($counts);
 
         return response()->json($counts);
