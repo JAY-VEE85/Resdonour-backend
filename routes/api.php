@@ -96,7 +96,6 @@ Route::middleware('auth:sanctum')->get('/chartMaterials', [ReportController::cla
 // likedpost of each user
 Route::middleware('auth:sanctum')->post('/posts/{id}/toggle-like', [UserPostsController::class, 'toggleLike']);
 Route::middleware('auth:sanctum')->get('/posts/{id}/total-likes', [UserPostsController::class, 'getTotalLikes']);
-// add view liked posts ni user
 
 // report generation
 // Route::middleware('auth:sanctum')->get('/getReport', [ReportController::class, 'getReport']);
@@ -109,7 +108,7 @@ Route::middleware('auth:sanctum')->get('/topLiked', [ReportController::class, 'g
 
 // trivia 
 Route::middleware('auth:sanctum')->prefix('trivia')->group(function () {
-    Route::get('getquestions', [TriviaQuestionController::class, 'index']);   // For users to view all questions
+    Route::get('getquestions', [TriviaQuestionController::class, 'index']);
 
     // para kay admin
     Route::post('questions', [TriviaQuestionController::class, 'create']);
@@ -123,8 +122,8 @@ Route::middleware('auth:sanctum')->prefix('trivia')->group(function () {
 
     // user score routes
     Route::get('user/score/{id}', [UserScoreController::class, 'getScores']);
-    Route::get('alluser/scores', [UserScoreController::class, 'getAllUsersScores']);
     Route::get('user/score', [UserScoreController::class, 'getUserScores']);
+    Route::get('alluser/correctscores', [UserScoreController::class, 'getAllCorrectScores']);
 });
 
 // badge for users

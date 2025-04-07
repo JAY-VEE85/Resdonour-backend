@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\TriviaQuestion;
 use App\Models\UserScore;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TriviaQuestionController extends Controller
 {
@@ -56,7 +57,20 @@ class TriviaQuestionController extends Controller
     public function getById($id)
     {
         $question = TriviaQuestion::findOrFail($id);
-        return response()->json($question);
+
+        $scoreStats = DB::table('user_scores')
+            ->selectRaw('
+                SUM(CASE WHEN is_correct = 1 THEN 1 ELSE 0 END) as correct_answers,
+                SUM(CASE WHEN is_correct = 0 THEN 1 ELSE 0 END) as wrong_answers
+            ')
+            ->where('trivia_question_id', $id)
+            ->first();
+
+        return response()->json([
+            'question' => $question,
+            'correct_answers' => $scoreStats->correct_answers ?? 0,
+            'wrong_answers' => $scoreStats->wrong_answers ?? 0,
+        ]);
     }
 
     public function update(Request $request, $id)

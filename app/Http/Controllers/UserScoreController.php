@@ -6,6 +6,7 @@ use App\Models\UserScore;
 use App\Models\user;
 use App\Models\TriviaQuestion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserScoreController extends Controller
 {
@@ -92,9 +93,6 @@ class UserScoreController extends Controller
         ]);
     }
 
-
-
-
     public function getUserScores()
     {
         $user = auth()->user();
@@ -103,32 +101,30 @@ class UserScoreController extends Controller
         return response()->json($scores);
     }
 
-    public function getAllUsersScores()
+    // all users score for envi-admin
+    public function getAllCorrectScores()
     {
-        $usersScores = UserScore::with('user')
-            ->selectRaw('user_id, SUM(score) as total_score')
-            ->groupBy('user_id')
-            ->get();
-
-        $result = $usersScores->map(function ($userScore) {
-            $user = $userScore->user;
-            $fullName = $user ? "{$user->fname} {$user->lname}" : 'Unknown';
-
-            return [
-                'user_name' => $fullName,
-                'user_id' => $userScore->user_id,
-                'total_score' => $userScore->total_score,
-            ];
-        });
+        $scores = DB::table('user_scores')
+            ->join('users', 'user_scores.user_id', '=', 'users.id')
+            ->select(
+                'user_scores.user_id',
+                DB::raw("CONCAT(users.fname, ' ', users.lname) AS full_name"),
+                DB::raw('SUM(CASE WHEN user_scores.is_correct = true THEN 1 ELSE 0 END) as correct_answers'),
+                DB::raw('COUNT(user_scores.id) as total_answers'),
+                'users.phone_number',
+                'users.email'
+            )
+            ->groupBy('user_scores.user_id', 'users.fname', 'users.lname', 'users.phone_number', 'users.email')
+            ->get()
+            ->map(function ($user) {
+                $user->wrong_answers = $user->total_answers - $user->correct_answers;
+                return $user;
+            });
 
         return response()->json([
-            'message' => 'All user scores retrieved successfully',
-            'users' => $result,
+            'message' => 'User scores retrieved successfully',
+            'users' => $scores,
         ]);
     }
-
-
-    
-
 }
 
