@@ -28,11 +28,11 @@ class UserSeeder extends Seeder
             'password' => Hash::make('Admin123'),
         ]);
 
-        // agri admin
+        // Environmental admin
         User::create([
             'fname' => 'Environmental',
             'lname' => 'Admin',
-            'email' => 'agri@gmail.com',
+            'email' => 'Environment@gmail.com',
             'phone_number' => '1234591827',
             'city' => 'Olongapo',
             'barangay' => 'Gordon Heights',
@@ -40,7 +40,22 @@ class UserSeeder extends Seeder
             'birthdate' => '2001-02-02',
             'email_verified_at' => '2025-02-02 04:18:09',
             'role' => 'agri',
-            'password' => Hash::make('Agriad123'),
+            'password' => Hash::make('EnviAd123'),
+        ]);
+
+        // Sk admin
+        User::create([
+            'fname' => 'Sk',
+            'lname' => 'Admin',
+            'email' => 'SkAdmin@gmail.com',
+            'phone_number' => '1234591827',
+            'city' => 'Olongapo',
+            'barangay' => 'Gordon Heights',
+            'street' => 'Blk #12 Ipil-Ipil St. (Long Rd, Upper)',
+            'birthdate' => '2001-02-02',
+            'email_verified_at' => '2025-02-02 04:18:09',
+            'role' => 'sangukab',
+            'password' => Hash::make('SkAdmin123'),
         ]);
 
         // Create 30 users

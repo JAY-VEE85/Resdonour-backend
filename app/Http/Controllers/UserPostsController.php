@@ -232,7 +232,7 @@ class UserPostsController extends Controller
         // Find the post, including soft-deleted ones
         $post = UserPost::withTrashed()->find($id);
 
-        if (!$post || ($post->user_id !== $user->id && $user->role !== 'admin' && $user->role !== 'agri')) {
+        if (!$post || ($post->user_id !== $user->id && $user->role !== 'admin' && $user->role !== 'agri' && $user->role !== 'sangukab')) {
             return response()->json(['error' => 'Post not found or unauthorized access'], 404);
         }
 

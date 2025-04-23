@@ -103,7 +103,7 @@ class User extends Authenticatable implements MustVerifyEmail
     // top users
     public static function getUsersWithPostAndLikeStats()
     {
-        return self::whereNotIn('role', ['admin', 'agri'])
+        return self::whereNotIn('role', ['admin', 'agri', 'sangukab'])
             ->withCount('posts')
             ->withSum('posts', 'total_likes')
             ->get()

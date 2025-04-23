@@ -25,7 +25,7 @@ class AdminController extends Controller
             ], 401);
         }
 
-        if (!in_array($user->role, ['admin', 'agri'])) {
+        if (!in_array($user->role, ['admin', 'agri', 'sangukab'])) {
             return response()->json([
                 'message' => 'Access denied. Admins only. wag papansin'
             ], 403);
@@ -49,7 +49,7 @@ class AdminController extends Controller
     {
         $user = auth()->user();
 
-        if (!in_array($user->role, ['admin', 'agri'])) {
+        if (!in_array($user->role, ['admin', 'agri' , 'sangukab'])) {
             return response()->json([
                 'message' => 'Access denied. Admins and Agri users only.'
             ], 403);
@@ -77,7 +77,7 @@ class AdminController extends Controller
         $user = auth()->user(); // Get the authenticated user
         $userId = $user->id;
 
-        if (!in_array($user->role, ['admin', 'agri'])) {
+        if (!in_array($user->role, ['admin', 'agri', 'sangukab'])) {
             return response()->json([
                 'message' => 'Access denied. Admins and Agri users only.'
             ], 403);
@@ -121,7 +121,7 @@ class AdminController extends Controller
         try {
             $user = auth()->user();
 
-            if (!$user || !in_array($user->role, ['admin', 'agri'])) {
+            if (!$user || !in_array($user->role, ['admin', 'agri', 'sangukab'])) {
                 return response()->json(['error' => 'Unauthorized. Only admin or agri users can delete posts.'], 403);
             }
 
@@ -150,7 +150,7 @@ class AdminController extends Controller
     {
         $user = auth()->user();
 
-        if (!in_array($user->role, ['admin', 'agri'])) {
+        if (!in_array($user->role, ['admin', 'agri', 'sangukab'])) {
             return response()->json([
                 'message' => 'Access denied. Admins and Agri users only.'
             ], 403);
