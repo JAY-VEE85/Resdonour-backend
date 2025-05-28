@@ -120,6 +120,17 @@ class BarangayPostsController extends Controller
             return response()->json(['message' => 'Post not found'], 404);
         }
 
+        if ($barangayPost->images) {
+            $images = json_decode($barangayPost->images, true);
+            
+            foreach ($images as $imagePath) {
+                // ✅ Check if file exists before deleting
+                if (\Storage::disk('public')->exists($imagePath)) {
+                    \Storage::disk('public')->delete($imagePath);
+                }
+            }
+        }
+
         $barangayPost->delete();
         
         return response()->json(['message' => 'Post and associated images deleted successfully']);
