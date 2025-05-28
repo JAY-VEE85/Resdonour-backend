@@ -69,7 +69,7 @@ class BarangayPostsController extends Controller
     }
 
 
-    // UPDATE POST - ayaw gumana
+    // UPDATE POST - working na sya cza
     public function updatePost(Request $request, $id)
     {
         $post = BarangayPost::find($id);
@@ -77,26 +77,28 @@ class BarangayPostsController extends Controller
             return response()->json(['error' => 'Post not found'], 404);
         }
 
-        // ✅ Update caption only if provided
         if ($request->has('caption')) {
             $post->caption = $request->input('caption');
         }
 
-        // ✅ Handle image uploads
         if ($request->hasFile('images')) {
             $images = [];
             foreach ($request->file('images') as $image) {
                 $path = $image->store('barangay_posts', 'public');
                 $images[] = $path;
             }
-            $post->images = json_encode($images); // ✅ Store image paths
+            $post->images = json_encode($images); 
         }
 
         // ✅ Handle removed images
         if ($request->has('removedImages')) {
             foreach ($request->input('removedImages') as $image) {
                 $imagePath = str_replace(asset('storage/'), '', $image);
-                \Storage::delete('public/' . $imagePath);
+                
+                // ✅ Check if file exists before deleting
+                if (\Storage::disk('public')->exists($imagePath)) {
+                    \Storage::disk('public')->delete($imagePath);
+                }
             }
         }
 
@@ -119,6 +121,7 @@ class BarangayPostsController extends Controller
         }
 
         $barangayPost->delete();
-        return response()->json(['message' => 'Post deleted successfully']);
+        
+        return response()->json(['message' => 'Post and associated images deleted successfully']);
     }
 }
