@@ -103,7 +103,9 @@ class PostSeeder extends Seeder
                 'user_id' => 3,
                 'image' => '../storage/images/jJlnLJIpbMt1WCvQG5oiSHYr2qGtCHA6ldNDBsaK.jpg',
                 'title' => 'Upcycling Projects: Turning Trash into Treasure',
-                'content' => 'Explore fun upcycling projects that turn everyday trash into creative and useful items, reducing waste in the process.',
+                'content' => 'Explore fun upcycling projects that turn everyday trash into creative and useful items, reducing waste in the process.
+                
+                https://youtu.be/hH_pjQGSees?si=EH0Wjb6Qrvp8bOdu',
                 'category' => 'Reuse',
                 'materials' => json_encode(['Rubber', 'Wood']),
                 'status' => 'posted',
@@ -117,7 +119,9 @@ class PostSeeder extends Seeder
                 'user_id' => 3,
                 'image' => 'storage/images/bXRPxq4OTu5pKPC4s6TjLgwO1C3p2hPLBXU6ZQrj.jpg',
                 'title' => 'Reduce Water Waste: Conservation Tips',
-                'content' => 'Water is a precious resource. Discover tips for reducing water waste in your home and garden to conserve this essential resource.',
+                'content' => 'Water is a precious resource. Discover tips for reducing water waste in your home and garden to conserve this essential resource.
+                
+                https://youtu.be/5J2Z3XDUw4o?si=BFiYxqr1qeoTDUFb',
                 'category' => 'Reduce',
                 'materials' => json_encode(['Tips & Tricks']),
                 'status' => 'posted',
@@ -131,7 +135,9 @@ class PostSeeder extends Seeder
                 'user_id' => 8,
                 'image' => '../storage/images/Egg-carton-lamp.jpg',
                 'title' => 'Egg Carton Lamp: Creative Upcycling Project',
-                'content' => 'Create a unique and eco-friendly lamp using an egg carton, maari itong gawin para mag mukhang aesthetic ang dating hindi lang sa maganda ito nakaka tulong pa tayo upang mapakinabangan ang lahat na nasa paligig natin. This upcycling project is a fun way to repurpose old materials and reduce waste.',
+                'content' => 'Create a unique and eco-friendly lamp using an egg carton, maari itong gawin para mag mukhang aesthetic ang dating hindi lang sa maganda ito nakaka tulong pa tayo upang mapakinabangan ang lahat na nasa paligig natin. This upcycling project is a fun way to repurpose old materials and reduce waste.
+                
+                https://youtu.be/IaGveGwL3eQ?si=aV8fqOFpwwgdYFaD',
                 'category' => 'Reuse',
                 'materials' => json_encode(['Paper', 'Boxes']),
                 'status' => 'posted',

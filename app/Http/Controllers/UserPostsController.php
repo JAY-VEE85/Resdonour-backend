@@ -248,41 +248,82 @@ class UserPostsController extends Controller
     }
 
     // toggle like post
+    // public function toggleLike(Request $request, $postId)
+    // {
+    //     $user = auth()->user();
+    //     $post = UserPost::find($postId);
+
+    //     if (!$post) {
+    //         return response()->json(['message' => 'Post not found'], 404);
+    //     }
+
+    //     // Check if the user has already liked the post
+    //     $liked = DB::table('post_likes')
+    //         ->where('user_id', $user->id)
+    //         ->where('post_id', $postId)
+    //         ->exists();
+
+    //     if ($liked) {
+    //         // Unlike the post
+    //         DB::table('post_likes')
+    //             ->where('user_id', $user->id)
+    //             ->where('post_id', $postId)
+    //             ->delete();
+    //     } else {
+    //         // Like the post
+    //         DB::table('post_likes')->insert([
+    //             'user_id' => $user->id,
+    //             'post_id' => $postId,
+    //             'created_at' => now(),
+    //             'updated_at' => now(),
+    //         ]);
+    //     }
+
+    //     $post->total_likes = DB::table('post_likes')->where('post_id', $postId)->count();
+    //     $post->save();
+
+    //     return response()->json(['total_likes' => $post->total_likes]);
+    // }
+
     public function toggleLike(Request $request, $postId)
     {
         $user = auth()->user();
-        $post = UserPost::find($postId);
+        
+        return DB::transaction(function () use ($user, $postId) {
+            $post = UserPost::lockForUpdate()->find($postId);
 
-        if (!$post) {
-            return response()->json(['message' => 'Post not found'], 404);
-        }
+            if (!$post) {
+                return response()->json(['message' => 'Post not found'], 404);
+            }
 
-        // Check if the user has already liked the post
-        $liked = DB::table('post_likes')
-            ->where('user_id', $user->id)
-            ->where('post_id', $postId)
-            ->exists();
-
-        if ($liked) {
-            // Unlike the post
-            DB::table('post_likes')
+            $liked = DB::table('post_likes')
                 ->where('user_id', $user->id)
                 ->where('post_id', $postId)
-                ->delete();
-        } else {
-            // Like the post
-            DB::table('post_likes')->insert([
-                'user_id' => $user->id,
-                'post_id' => $postId,
-                'created_at' => now(),
-                'updated_at' => now(),
+                ->exists();
+
+            if ($liked) {
+                DB::table('post_likes')
+                    ->where('user_id', $user->id)
+                    ->where('post_id', $postId)
+                    ->delete();
+                
+                $post->decrement('total_likes');
+            } else {
+                DB::table('post_likes')->insert([
+                    'user_id' => $user->id,
+                    'post_id' => $postId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                
+                $post->increment('total_likes');
+            }
+
+            return response()->json([
+                'total_likes' => $post->total_likes,
+                'user_liked' => !$liked
             ]);
-        }
-
-        $post->total_likes = DB::table('post_likes')->where('post_id', $postId)->count();
-        $post->save();
-
-        return response()->json(['total_likes' => $post->total_likes]);
+        });
     }
 
     // get total likes
@@ -311,6 +352,7 @@ class UserPostsController extends Controller
                 'user_posts.title',
                 'user_posts.category',
                 'user_posts.content',
+                'user_posts.materials',
                 'user_posts.total_likes',
                 'user_posts.created_at',
                 'post_likes.created_at as liked_at',
