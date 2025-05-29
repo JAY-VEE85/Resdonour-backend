@@ -14,9 +14,24 @@ class PostSeeder extends Seeder
     public function run(): void
     {
         $posts = [
+
+        // "user_id": 3,
+        // "image": "http://127.0.0.1:8000/storage/storage/images/sustainable-fashion.jpg",
+        // "title": "Sustainable Fashion: Reuse and Recycle Clothing",
+        // "content": "Find out how sustainable fashion can help reduce waste by reusing and recycling clothing, and learn about eco-friendly fashion choices.",
+        // "category": "Reuse",
+        // 'materials' => json_encode(['Plastic']),
+        // "status": "posted",
+        // "total_likes": 0,
+        // 'report_count' => 0,
+        // "liked_by_user": false,
+        // "created_at": "2025-05-26 21:36:08"
+        // 'report_reasons' => json_encode([]),
+        // 'report_remarks' => null,
+
             [
                 'user_id' => 1,
-                'image' => '../storage/images/bottle-art.png',
+                'image' => 'images/bottle-art.png',
                 'title' => 'Blossom Bottle Art: Creative Ways to Reuse Plastic Bottles',
                 'content' => 'Maaring gamitin ang mga plastic bottles sa paggawa ng mga creative na art projects. Ito ay isang magandang paraan upang mabawasan ang basura at makatulong sa kalikasan.',
                 'category' => 'Reuse',
@@ -25,6 +40,8 @@ class PostSeeder extends Seeder
                 'report_count' => 0,
                 'report_reasons' => json_encode([]),
                 'report_remarks' => null,
+                'total_likes' => 12,
+                // done
             ],
             [
                 'user_id' => 2,
@@ -37,6 +54,8 @@ class PostSeeder extends Seeder
                 'report_count' => 0,
                 'report_reasons' => json_encode([]),
                 'report_remarks' => null,
+                'total_likes' => 9,
+                // done
             ],
             [
                 'user_id' => 3,
@@ -49,6 +68,8 @@ class PostSeeder extends Seeder
                 'report_count' => 0,
                 'report_reasons' => json_encode([]),
                 'report_remarks' => null,
+                'total_likes' => 5,
+                // done
             ],
             [
                 'user_id' => 3,
@@ -61,10 +82,12 @@ class PostSeeder extends Seeder
                 'report_count' => 0,
                 'report_reasons' => json_encode([]),
                 'report_remarks' => null,
+                'total_likes' => 18,
+                // done
             ],
             [
                 'user_id' => 3,
-                'image' => 'storage/images/sustainable-fashion.jpg',
+                'image' => 'images/ISBSSJyYEexA5Zs1bGYBexpUZZJAyDQdOthm7aug.jpg',
                 'title' => 'Sustainable Fashion: Reuse and Recycle Clothing',
                 'content' => 'Find out how sustainable fashion can help reduce waste by reusing and recycling clothing, and learn about eco-friendly fashion choices.',
                 'category' => 'Reuse',
@@ -73,10 +96,12 @@ class PostSeeder extends Seeder
                 'report_count' => 0,
                 'report_reasons' => json_encode([]),
                 'report_remarks' => null,
+                'total_likes' => 2,
+                // done
             ],
             [
                 'user_id' => 3,
-                'image' => 'storage/images/upcycling-projects.jpg',
+                'image' => '../storage/images/jJlnLJIpbMt1WCvQG5oiSHYr2qGtCHA6ldNDBsaK.jpg',
                 'title' => 'Upcycling Projects: Turning Trash into Treasure',
                 'content' => 'Explore fun upcycling projects that turn everyday trash into creative and useful items, reducing waste in the process.',
                 'category' => 'Reuse',
@@ -85,10 +110,12 @@ class PostSeeder extends Seeder
                 'report_count' => 0,
                 'report_reasons' => json_encode([]),
                 'report_remarks' => null,
+                'total_likes' => 5,
+                // done
             ],
             [
                 'user_id' => 3,
-                'image' => 'storage/images/water-conservation.jpg',
+                'image' => 'storage/images/bXRPxq4OTu5pKPC4s6TjLgwO1C3p2hPLBXU6ZQrj.jpg',
                 'title' => 'Reduce Water Waste: Conservation Tips',
                 'content' => 'Water is a precious resource. Discover tips for reducing water waste in your home and garden to conserve this essential resource.',
                 'category' => 'Reduce',
@@ -97,6 +124,8 @@ class PostSeeder extends Seeder
                 'report_count' => 0,
                 'report_reasons' => json_encode([]),
                 'report_remarks' => null,
+                'total_likes' => 1,
+                // done
             ],
             [
                 'user_id' => 8,
@@ -109,6 +138,7 @@ class PostSeeder extends Seeder
                 'report_count' => 0,
                 'report_reasons' => json_encode([]),
                 'report_remarks' => null,
+                'total_likes' => 20,
             ],
             [
                 'user_id' => 9,
@@ -121,10 +151,11 @@ class PostSeeder extends Seeder
                 'report_count' => 0,
                 'report_reasons' => json_encode([]),
                 'report_remarks' => null,
+                'total_likes' => 15,
             ],
             [
                 'user_id' => 10,
-                'image' => 'storage/images/recycling-centers.jpg',
+                'image' => '../storage/app/public/images/recycling-centers.jpg',
                 'title' => 'Recycling Centers: What You Can and Cannot Recycle',
                 'content' => 'Not everything can be recycled. Learn what you can and cannot recycle at your local recycling center to reduce contamination.',
                 'category' => 'Recycle',
@@ -133,6 +164,7 @@ class PostSeeder extends Seeder
                 'report_count' => 0,
                 'report_reasons' => json_encode([]),
                 'report_remarks' => null,
+                'total_likes' => 3,
             ],
 
 
@@ -148,6 +180,7 @@ class PostSeeder extends Seeder
                 'report_count' => 5,
                 'report_reasons' => json_encode(['Inappropriate Content', 'Spam']),
                 'report_remarks' => 'Pending admin review.',
+                'total_likes' => 0,
             ],
             [
                 'user_id' => 3,
@@ -160,6 +193,7 @@ class PostSeeder extends Seeder
                 'report_count' => 8,
                 'report_reasons' => json_encode(['Misinformation', 'Fake News']),
                 'report_remarks' => 'Review needed by fact-check team.',
+                'total_likes' => 0,
             ],
             [
                 'user_id' => 6,
@@ -172,6 +206,7 @@ class PostSeeder extends Seeder
                 'report_count' => 9,
                 'report_reasons' => json_encode(['Spam', 'Unwanted Advertisement']),
                 'report_remarks' => 'Pending admin removal.',
+                'total_likes' => 0,
             ],
         ];
 
