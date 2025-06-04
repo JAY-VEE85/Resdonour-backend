@@ -10,6 +10,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\TriviaQuestionController;
 use App\Http\Controllers\UserScoreController;
 use App\Http\Controllers\BarangayPostsController;
+use App\Http\Controllers\VisitController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -85,6 +86,11 @@ Route::middleware('auth:sanctum')->get('/showallphotos', [AdminController::class
 Route::middleware('auth:sanctum')->post('/editLatestPhoto', [AdminController::class, 'editLatestPhoto']);
 Route::middleware('auth:sanctum')->delete('/deletephoto/{id}', [AdminController::class, 'deletephoto']);
 Route::middleware('auth:sanctum')->post('/deleteAllPhotos', [AdminController::class, 'deleteAllPhotos']);
+
+// for landing page visit
+Route::get('/totalvisits', [VisitController::class, 'getTotalVisits']);
+Route::post('/landingpagevisit', [VisitController::class, 'addLandingPageVisit']);
+
 
 // for admin dashboard
 Route::middleware('auth:sanctum')->get('/dashboardStatistics', [AdminController::class, 'dashboardStatistics']);
