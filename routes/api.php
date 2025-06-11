@@ -11,6 +11,7 @@ use App\Http\Controllers\TriviaQuestionController;
 use App\Http\Controllers\UserScoreController;
 use App\Http\Controllers\BarangayPostsController;
 use App\Http\Controllers\VisitController;
+use App\Http\Controllers\LogsController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -160,6 +161,10 @@ Route::middleware('auth:sanctum')->group(function () {
 // users tab
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
 Route::middleware('auth:sanctum')->delete('/delete/user', [UserController::class, 'destroy']);
+
+// for logs
+Route::middleware('auth:sanctum')->get('/logs', [LogsController::class, 'getLogs']); 
+
 
 // backend done, modif nalang if need hehe
 

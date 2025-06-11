@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\UserPost;
 use App\Models\Announcement;
+use App\Models\ActivityLog;
 
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -18,6 +19,49 @@ class UserPostsController extends Controller
     {
         $this->middleware('auth');
     }
+
+    // public function createPost(Request $request)
+    // {
+    //     if (!auth()->check()) {
+    //         return response()->json(['error' => 'Unauthorized'], 401);
+    //     }
+
+    //     $request->validate([
+    //         'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,MOV,avi,mkv|max:51200',
+    //         'title' => 'required|string|max:255',
+    //         'content' => 'required|string|max:11000',
+    //         'category' => 'required|string|max:100',
+    //         'materials' => 'nullable|array',
+    //         'materials.*' => 'string|max:255'
+    //     ]);
+
+    //     $filePath = null;
+
+    //     if ($request->hasFile('image')) {
+    //         $file = $request->file('image');
+    //         $extension = $file->getClientOriginalExtension();
+
+    //         // Store in different directories based on file type
+    //         if (in_array($extension, ['jpeg', 'png', 'jpg', 'gif'])) {
+    //             $filePath = $file->store('images', 'public');
+    //         } elseif (in_array($extension, ['mp4', 'mov', 'MOV', 'avi', 'mkv'])) {
+    //             $filePath = $file->store('videos', 'public');
+    //         }
+    //     }
+
+    //     $post = new UserPost();
+    //     $post->user_id = auth()->id();
+    //     $post->image = $filePath; // Now supports both images & videos
+    //     $post->title = $request->input('title');
+    //     $post->content = $request->input('content');
+    //     $post->category = $request->input('category');
+    //     $post->materials = $request->has('materials') ? json_encode($request->input('materials')) : json_encode([]);
+    //     $post->status = 'posted';
+
+    //     $post->save();
+
+    //     return response()->json(['message' => 'Post created successfully', 'post' => $post]);
+    // }
 
     public function createPost(Request $request)
     {
@@ -58,6 +102,13 @@ class UserPostsController extends Controller
         $post->status = 'posted';
 
         $post->save();
+
+        // Log the activity
+        ActivityLog::create([
+            'user_id' => auth()->id(), 
+            'action' => 'Posted on Community Feed', 
+            'details' => json_encode(['post_id' => $post->id]), 
+        ]);
 
         return response()->json(['message' => 'Post created successfully', 'post' => $post]);
     }

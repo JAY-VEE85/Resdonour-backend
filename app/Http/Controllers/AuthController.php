@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Models\ActivityLog;
 
 // for emailingz
 use Illuminate\Support\Facades\Mail;
@@ -178,43 +179,98 @@ class AuthController extends Controller
         return response()->json(['message' => 'Password has been reset successfully']);
     }
 
+    // public function login(Request $request)
+    // {
+    //     // Validate login request
+    //     $validator = Validator::make($request->all(), [
+    //         'email' => 'required|string|email',
+    //         'password' => 'required|string|min:8',
+    //     ]);
+
+    //     // If validation fails
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+
+    //     // Attempt to authenticate user
+    //     if (!Auth::attempt($request->only('email', 'password'))) {
+    //         return response()->json(['error' => 'Invalid credentials'], 401);
+    //     }
+
+    //     // Get authenticated user
+    //     $user = Auth::user();
+
+    //     // Check if the user has verified their email
+    //     if (!$user->hasVerifiedEmail()) {
+    //         return response()->json(['error' => 'Please verify your email before logging in.'], 403);
+    //     }
+
+    //     // Generate token if email is verified
+    //     $token = $user->createToken('auth_token')->plainTextToken;
+
+    //     // Return response with token and user info
+    //     return response()->json([
+    //         'message' => 'Login successful',
+    //         'token' => $token,
+    //         'user' => $user,   // user data
+    //         'role' => $user->role   // assuming 'role' column exists in users table
+    //     ]);
+    // }
+
     public function login(Request $request)
     {
-        // Validate login request
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string|min:8',
         ]);
 
-        // If validation fails
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        // Attempt to authenticate user
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json(['error' => 'Invalid credentials'], 401);
         }
 
-        // Get authenticated user
         $user = Auth::user();
 
-        // Check if the user has verified their email
         if (!$user->hasVerifiedEmail()) {
             return response()->json(['error' => 'Please verify your email before logging in.'], 403);
         }
 
-        // Generate token if email is verified
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // Return response with token and user info
+        $userName = $request->user()->fname . ' ' . $request->user()->lname;
+
+        // Log the login activity
+        ActivityLog::create([
+            'user_id' => $user->id, 
+            'action' => "$userName has logged in.",    
+            'details' => json_encode(['ip' => $request->ip()]), 
+        ]);
+
         return response()->json([
             'message' => 'Login successful',
             'token' => $token,
-            'user' => $user,   // user data
-            'role' => $user->role   // assuming 'role' column exists in users table
+            'user' => $user,
+            'role' => $user->role, 
         ]);
     }
+
+
+    // public function logout(Request $request)
+    // {
+    //     Log::info('Logout request received', ['user' => $request->user()]);
+
+    //     if (!$request->user()) {
+    //         return response()->json(['error' => 'User not authenticated'], 401);
+    //     }
+
+    //     // Revoke all tokens
+    //     $request->user()->tokens()->delete();
+
+    //     return response()->json(['message' => 'Logout successful'], 200);
+    // }
 
     public function logout(Request $request)
     {
@@ -224,8 +280,15 @@ class AuthController extends Controller
             return response()->json(['error' => 'User not authenticated'], 401);
         }
 
-        // Revoke all tokens
         $request->user()->tokens()->delete();
+
+        $userName = $request->user()->fname . ' ' . $request->user()->lname;
+
+        ActivityLog::create([
+            'user_id' => $request->user()->id, 
+            'action' => "$userName has logged out.",              
+            'details' => null,                
+        ]);
 
         return response()->json(['message' => 'Logout successful'], 200);
     }
