@@ -71,36 +71,6 @@ class TriviaSeeder extends Seeder
                 ]),
                 'created_at' => '2025-02-28 04:18:09',
             ],
-
-            // Gardening Trivia
-            [
-                'category' => 'Gardening',
-                'title' => 'Trees and oxygen',
-                'facts' => 'A single tree can provide oxygen for up to 4 people per day.',
-                'question' => 'How many people can a single tree provide oxygen for daily?',
-                'correct_answer' => '4',
-                'answers' => json_encode([
-                    '1',
-                    '2',
-                    '4',
-                    '10'
-                ]),
-                'created_at' => '2025-02-27 04:18:09',
-            ],
-            [
-                'category' => 'Gardening',
-                'title' => 'Companion planting',
-                'facts' => 'Basil and tomatoes grow better together because basil helps repel pests that attack tomatoes!',
-                'question' => 'Which herb helps tomatoes grow better by repelling pests?',
-                'correct_answer' => 'Basil',
-                'answers' => json_encode([
-                    'Basil',
-                    'Mint',
-                    'Rosemary',
-                    'Cilantro'
-                ]),
-                'created_at' => now(),
-            ],
         ]);
     }
 }

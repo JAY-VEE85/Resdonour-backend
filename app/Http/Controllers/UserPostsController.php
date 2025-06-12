@@ -165,13 +165,20 @@ class UserPostsController extends Controller
 
         $post->save();
 
+        // Log the activity
+        ActivityLog::create([
+            'user_id' => auth()->id(), 
+            'action' => 'Edited their post in the Community Feed', 
+            'details' => json_encode(['post_id' => $post->id]), 
+        ]);
+
         return response()->json(['message' => 'Post updated successfully', 'post' => $post]);
     }
 
     // get post by id
     public function getPost($postId)
     {
-        $userId = auth()->id(); // Get the logged-in user ID
+        $userId = auth()->id();
 
         $post = UserPost::withTrashed()->with('user')->find($postId);
 
@@ -219,7 +226,7 @@ class UserPostsController extends Controller
         }
 
         $posts = $user->posts()
-            ->withTrashed() // Include soft-deleted posts
+            ->withTrashed()
             ->get()
             ->map(function ($post) {
                 $post->image = $post->image ? url('storage/' . $post->image) : null;
@@ -233,7 +240,7 @@ class UserPostsController extends Controller
     // GET ALL USERS POSTS - hide the reported post from user who reports
     public function getAllPosts()
     {
-        $userId = auth()->id(); // Get the logged-in user ID
+        $userId = auth()->id();
         $currentDate = now();
 
         $posts = UserPost::orderBy('created_at', 'desc')->get()->filter(function ($post) use ($userId, $currentDate) {
@@ -263,7 +270,7 @@ class UserPostsController extends Controller
                 'liked_by_user' => DB::table('post_likes')
                     ->where('user_id', $userId)
                     ->where('post_id', $post->id)
-                    ->exists(), // Check if the user liked the post
+                    ->exists(),
                 'created_at' => $post->created_at->format('Y-m-d H:i:s'),
             ];
         });
@@ -294,6 +301,13 @@ class UserPostsController extends Controller
 
         // **Force delete the post permanently**
         $post->forceDelete();
+
+        // Log the activity
+        ActivityLog::create([
+            'user_id' => auth()->id(), 
+            'action' => 'Deleted their post from the Community Feed', 
+            'details' => json_encode(['post_id' => $post->id]), 
+        ]);
 
         return response()->json(['message' => 'Post permanently deleted'], 200);
     }
@@ -391,13 +405,13 @@ class UserPostsController extends Controller
 
     public function getLikedPosts()
     {
-        $userId = Auth::id(); // Get logged-in user ID
+        $userId = Auth::id();
 
         $likedPosts = \DB::table('post_likes')
             ->join('user_posts', 'post_likes.post_id', '=', 'user_posts.id')
             ->join('users', 'user_posts.user_id', '=', 'users.id')
             ->where('post_likes.user_id', $userId)
-            ->orderBy('post_likes.created_at', 'desc') // Sort by liked time
+            ->orderBy('post_likes.created_at', 'desc')
             ->select(
                 'user_posts.id',
                 'user_posts.title',
@@ -424,39 +438,6 @@ class UserPostsController extends Controller
             'liked_posts' => $likedPosts
         ]);
     }
-
-    // posts reporting
-    // public function reportPost(Request $request, $postId)
-    // {
-    //     $user = auth()->user();
-    //     $post = UserPost::find($postId);
-
-    //     if (!$post) {
-    //         return response()->json(['error' => 'Post not found'], 404);
-    //     }
-
-    //     $request->validate([
-    //         'reasons' => 'required|array|min:1',
-    //         'reasons.*' => 'string|max:255'
-    //     ]);
-
-    //     $existingReasons = json_decode($post->report_reasons, true) ?? [];
-    //     $post->report_reasons = json_encode(array_merge($existingReasons, $request->input('reasons')));
-    //     $post->report_count += 1;
-    //     $post->status = 'reported';
-
-    //     $reportedByUsers = json_decode($post->reported_by_users, true) ?? [];
-    //     $reportedByUsers[$user->id] = now()->format('Y-m-d'); // Store the date of report
-    //     $post->reported_by_users = json_encode($reportedByUsers);
-
-    //     $post->save();
-
-    //     return response()->json([
-    //         'message' => 'Post reported successfully',
-    //         'report_count' => $post->report_count,
-    //         'status' => $post->status
-    //     ]);
-    // }
 
     // final reporting post
     public function reportPost(Request $request, $postId)

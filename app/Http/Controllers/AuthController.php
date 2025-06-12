@@ -52,7 +52,6 @@ class AuthController extends Controller
             'street' => $request->street,
             'birthdate' => $request->birthdate,
             'password' => Hash::make($request->password),
-            // 'badge' => 'Newbie',
         ]);
         
         // Generate a random 6-character alphanumeric code
@@ -93,10 +92,8 @@ class AuthController extends Controller
             ['token' => $token, 'created_at' => now()]
         );
 
-        // Get the user's first name
         $firstName = $user->fname;
 
-        // Email content
         $subject = "{$token} is your password reset code";
         $body = "Hello, {$firstName}!\n\n".
                 "We received a request to reset your password. Use the code below to proceed with resetting your password:\n\n".
@@ -139,13 +136,12 @@ class AuthController extends Controller
         return response()->json(['message' => 'Token is valid']);
     }
 
-    // without auto login
     public function resetPassword(Request $request)
     {
         $request->validate([
             'email' => 'required|email|exists:users,email',
             'password' => 'required|min:8|confirmed',
-            'token' => 'required', // Ensure the token is provided
+            'token' => 'required',
         ]);
 
         // Find the reset token from the database
@@ -178,44 +174,6 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Password has been reset successfully']);
     }
-
-    // public function login(Request $request)
-    // {
-    //     // Validate login request
-    //     $validator = Validator::make($request->all(), [
-    //         'email' => 'required|string|email',
-    //         'password' => 'required|string|min:8',
-    //     ]);
-
-    //     // If validation fails
-    //     if ($validator->fails()) {
-    //         return response()->json($validator->errors(), 422);
-    //     }
-
-    //     // Attempt to authenticate user
-    //     if (!Auth::attempt($request->only('email', 'password'))) {
-    //         return response()->json(['error' => 'Invalid credentials'], 401);
-    //     }
-
-    //     // Get authenticated user
-    //     $user = Auth::user();
-
-    //     // Check if the user has verified their email
-    //     if (!$user->hasVerifiedEmail()) {
-    //         return response()->json(['error' => 'Please verify your email before logging in.'], 403);
-    //     }
-
-    //     // Generate token if email is verified
-    //     $token = $user->createToken('auth_token')->plainTextToken;
-
-    //     // Return response with token and user info
-    //     return response()->json([
-    //         'message' => 'Login successful',
-    //         'token' => $token,
-    //         'user' => $user,   // user data
-    //         'role' => $user->role   // assuming 'role' column exists in users table
-    //     ]);
-    // }
 
     public function login(Request $request)
     {
@@ -257,21 +215,6 @@ class AuthController extends Controller
         ]);
     }
 
-
-    // public function logout(Request $request)
-    // {
-    //     Log::info('Logout request received', ['user' => $request->user()]);
-
-    //     if (!$request->user()) {
-    //         return response()->json(['error' => 'User not authenticated'], 401);
-    //     }
-
-    //     // Revoke all tokens
-    //     $request->user()->tokens()->delete();
-
-    //     return response()->json(['message' => 'Logout successful'], 200);
-    // }
-
     public function logout(Request $request)
     {
         Log::info('Logout request received', ['user' => $request->user()]);
@@ -295,10 +238,7 @@ class AuthController extends Controller
 
     public function index()
     {
-        // Get all users
         $users = User::all();
-
-        // Return users as JSON
         return response()->json($users, 200);
     }
 
@@ -306,19 +246,16 @@ class AuthController extends Controller
     // for canceling registration
     public function cancelRegistration(Request $request)
     {
-        // Validate the request to ensure email is provided
         $request->validate([
             'email' => 'required|email|exists:users,email',
         ]);
 
-        // Find the user by email
         $user = User::where('email', $request->email)->first();
 
-        // Ensure the user has not yet verified their email
         if ($user->hasVerifiedEmail()) {
             return response()->json([
                 'message' => 'You cannot cancel your registration because your email is already verified.'
-            ], 403); // Forbidden action
+            ], 403);
         }
 
         // Delete the user from the database
@@ -333,22 +270,18 @@ class AuthController extends Controller
     {
         \Log::info('Cancel Registration Request:', $request->all());
 
-        // Validate the request to ensure email is provided
         $request->validate([
             'email' => 'required|email|exists:users,email',
         ]);
 
-        // Find the user by email
         $user = User::where('email', $request->email)->first();
 
-        // Ensure the user has not yet verified their email
         if ($user->hasVerifiedEmail()) {
             return response()->json([
                 'message' => 'You cannot cancel your registration because your email is already verified.'
-            ], 403); // Forbidden action
+            ], 403);
         }
 
-        // Delete the user from the database
         $user->delete();
 
         return response()->json([

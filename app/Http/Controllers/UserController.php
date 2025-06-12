@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -63,7 +64,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'User information updated successfully!',
-            'user' => $user->fresh() // Ensures the latest data is returned
+            'user' => $user->fresh()
         ], 200);
     }
 
@@ -106,11 +107,17 @@ class UserController extends Controller
 
         if ($user) {
             if ($user->role == 'admin' || $user->id == $request->user_id) {
-                $userToDelete = User::find($request->user_id);  // Get user by ID
+                $userToDelete = User::find($request->user_id);
 
                 if ($userToDelete) {
-                    // Perform the deletion
                     $userToDelete->delete();
+
+                    ActivityLog::create([
+                        'user_id' => $user->id,
+                        'action' => "Deleted a User Account",
+                        'details' => json_encode(['user_account_id' => $user->id]),
+                    ]);
+
                     return response()->json(['message' => 'User deleted successfully.'], 200);
                 } else {
                     return response()->json(['message' => 'User not found.'], 404);

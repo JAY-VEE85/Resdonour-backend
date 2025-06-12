@@ -7,6 +7,7 @@ use App\Models\UserPost;
 use App\Models\User;
 use App\Models\LandingPhotos;
 use App\Models\BarangayPost;
+use App\Models\ActivityLog;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -74,7 +75,7 @@ class AdminController extends Controller
     // admin view post
     public function getPost($postId)
     {
-        $user = auth()->user(); // Get the authenticated user
+        $user = auth()->user();
         $userId = $user->id;
 
         if (!in_array($user->role, ['admin', 'agri', 'sangukab'])) {
@@ -139,8 +140,19 @@ class AdminController extends Controller
 
             $post->delete();
 
+            // Get author firstname manually
+            $author = \App\Models\User::find($post->user_id);
+            $postAuthorFirstname = $author ? $author->fname : 'Unknown User';
+
+            ActivityLog::create([
+                'user_id' => $user->id,
+                'action' => "Removed a post by $postAuthorFirstname from the Community Feed",
+                'details' => json_encode(['post_id' => $post->id]),
+            ]);
+
             return response()->json(['message' => 'Post soft deleted successfully.'], 200);
         } catch (\Exception $e) {
+            \Log::error('Soft Delete Post Error: ' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -177,44 +189,6 @@ class AdminController extends Controller
         return response()->json($posts);
     }
 
-    // public function awardBadge(Request $request, $id)
-    //     {
-    //         if (!in_array(auth()->user()->role, ['admin', 'agri'])) {
-    //             return response()->json(['message' => 'Unauthorized. Only admin and agri-admin can award badges.'], 403);
-    //         }
-        
-    //         $user = User::findOrFail($id);
-        
-    //         $badge = $request->input('badge');
-        
-    //         $user->awardBadge($badge);
-        
-    //         return response()->json(['message' => 'Badge awarded successfully!', 'badges' => json_decode($user->badges)]);
-    //     }
-    
-    // public function removeBadge(Request $request, $id)
-    //     {
-    //         if (!in_array(auth()->user()->role, ['admin', 'agri'])) {
-    //             return response()->json(['message' => 'Unauthorized. Only admin and agri-admin can remove badges.'], 403);
-    //         }
-
-    //         $user = User::findOrFail($id);
-
-    //         $badge = $request->input('badge');
-
-    //         $currentBadges = json_decode($user->badges, true) ?? [];
-    //         if (in_array($badge, $currentBadges)) {
-    //             $currentBadges = array_filter($currentBadges, fn($b) => $b !== $badge);
-    //             $user->badges = json_encode(array_values($currentBadges));
-    //             $user->save();
-    //         }
-
-    //         return response()->json([
-    //             'message' => 'Badge removed successfully!',
-    //             'badges' => json_decode($user->badges)
-    //         ]);
-    //     }
-
     // for landing page photos
     public function addphotos(Request $request)
     {   
@@ -243,7 +217,6 @@ class AdminController extends Controller
                 }
             }
 
-            // Store data in database
             $landing_photos = \App\Models\LandingPhotos::create([
                 'image1' => $images['image1'] ?? null,
                 'content1' => $validated['content1'] ?? null,
@@ -255,6 +228,12 @@ class AdminController extends Controller
                 'content4' => $validated['content4'] ?? null,
                 'image5' => $images['image5'] ?? null,
                 'content5' => $validated['content5'] ?? null,
+            ]);
+
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => "Customized the landing page photos",
+                'details' => json_encode(['landing_photos_id' => $landing_photos->id]),
             ]);
 
             return response()->json([
@@ -273,10 +252,8 @@ class AdminController extends Controller
     public function showlatestphoto()
     {
         try {
-            // Retrieve the latest photo entry
             $latestPhoto = \App\Models\LandingPhotos::latest()->first();
 
-            // Check if there is any photo entry
             if (!$latestPhoto) {
                 return response()->json([
                     'message' => 'No photos found.',
@@ -284,10 +261,8 @@ class AdminController extends Controller
                 ], 200);
             }
 
-            // Define the base URL for storage images
             $baseURL = url('storage/');
 
-            // Return JSON response with full image URLs
             return response()->json([
                 'message' => 'Latest photo retrieved successfully!',
                 'data' => [
@@ -317,24 +292,19 @@ class AdminController extends Controller
     public function showallphotos()
     {
         try {
-            // Retrieve all photo entries sorted by latest first
             $photos = \App\Models\LandingPhotos::orderBy('created_at', 'desc')->get();
 
-            // If no previous photos exist, return an empty array (not a 404 error)
             if ($photos->count() <= 1) {
                 return response()->json([
                     'message' => 'No previous photos found.',
-                    'data' => [] // Return empty data with 200 status
+                    'data' => []
                 ], 200);
             }
 
-            // Remove the latest entry
             $photos = $photos->skip(1)->values();
 
-            // Define the base URL for storage images
             $baseURL = url('storage/');
 
-            // Format the response data
             $formattedPhotos = $photos->map(function ($photo) use ($baseURL) {
                 return [
                     'id' => $photo->id,
@@ -352,7 +322,6 @@ class AdminController extends Controller
                 ];
             });
 
-            // Return JSON response
             return response()->json([
                 'message' => 'All photos except the latest retrieved successfully!',
                 'data' => $formattedPhotos
@@ -369,10 +338,8 @@ class AdminController extends Controller
     public function editLatestPhoto(Request $request)
     {
         try {
-            // Retrieve the latest photo entry
             $latestPhoto = \App\Models\LandingPhotos::latest()->first();
 
-            // Check if there is any photo entry
             if (!$latestPhoto) {
                 return response()->json([
                     'message' => 'No photos found to edit.',
@@ -380,7 +347,6 @@ class AdminController extends Controller
                 ], 200);
             }
 
-            // Validate request
             $validated = $request->validate([
                 'image1' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                 'content1' => 'nullable|string|max:255',
@@ -394,28 +360,29 @@ class AdminController extends Controller
                 'content5' => 'nullable|string|max:255'
             ]);
 
-            // Upload new images if present and replace the existing ones
             for ($i = 1; $i <= 5; $i++) {
                 $imageKey = 'image' . $i;
                 $contentKey = 'content' . $i;
 
                 if ($request->hasFile($imageKey)) {
-                    // Delete the old image if exists
                     if ($latestPhoto->$imageKey) {
                         \Storage::disk('public')->delete($latestPhoto->$imageKey);
                     }
-                    // Store the new image
                     $latestPhoto->$imageKey = $request->file($imageKey)->store('landing_photos', 'public');
                 }
 
-                // Update content if provided
                 if ($request->filled($contentKey)) {
                     $latestPhoto->$contentKey = $validated[$contentKey];
                 }
             }
 
-            // Save the updated entry
             $latestPhoto->save();
+
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => "Edited the landing page photos",
+                'details' => json_encode(['landing_photos_id' => $latestPhoto->id]),
+            ]);
 
             return response()->json([
                 'message' => 'Latest photo updated successfully!',
@@ -433,7 +400,6 @@ class AdminController extends Controller
     public function deletephoto($id)
     {
         try {
-            // Find the photo entry by ID
             $photo = \App\Models\LandingPhotos::find($id);
 
             if (!$photo) {
@@ -443,7 +409,6 @@ class AdminController extends Controller
                 ], 404);
             }
 
-            // Delete images from storage if they exist
             for ($i = 1; $i <= 5; $i++) {
                 $imageKey = 'image' . $i;
                 if ($photo->$imageKey) {
@@ -451,8 +416,13 @@ class AdminController extends Controller
                 }
             }
 
-            // Delete the entry from the database
             $photo->delete();
+
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => "Deleted landing page photos",
+                'details' => json_encode(['landing_photos_id' => $photo->id]),
+            ]);
 
             return response()->json([
                 'message' => 'Highlight deleted successfully!',
@@ -470,7 +440,6 @@ class AdminController extends Controller
     public function deleteAllPhotos()
     {
         try {
-            // Get the latest uploaded entry
             $latestPhoto = \App\Models\LandingPhotos::latest()->first();
 
             if (!$latestPhoto) {
@@ -480,7 +449,6 @@ class AdminController extends Controller
                 ], 404);
             }
 
-            // Get all previous entries excluding the latest
             $previousPhotos = \App\Models\LandingPhotos::where('id', '!=', $latestPhoto->id)->get();
 
             if ($previousPhotos->isEmpty()) {
@@ -490,7 +458,8 @@ class AdminController extends Controller
                 ], 404);
             }
 
-            // Loop through and delete images from storage
+            $deletedIds = [];
+            
             foreach ($previousPhotos as $photo) {
                 for ($i = 1; $i <= 5; $i++) {
                     $imageKey = 'image' . $i;
@@ -498,9 +467,15 @@ class AdminController extends Controller
                         \Storage::disk('public')->delete($photo->$imageKey);
                     }
                 }
-                // Delete the database entry
+                $deletedIds[] = $photo->id;
                 $photo->delete();
             }
+
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => "Deleted all previous landing page photos",
+                'details' => json_encode(['deleted_photo_ids' => $deletedIds]),
+            ]);
 
             return response()->json([
                 'message' => 'All previous photo entries deleted successfully!',

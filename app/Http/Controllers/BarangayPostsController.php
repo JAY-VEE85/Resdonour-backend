@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\BarangayPost;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Storage;
-
 
 class BarangayPostsController extends Controller
 {
@@ -18,18 +18,23 @@ class BarangayPostsController extends Controller
             'images.*' => 'image|mimes:jpg,jpeg,png,gif|max:10240',
         ]);
 
-        $imagesPaths = []; // Array to store file paths
+        $imagesPaths = [];
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $imagesPaths[] = $image->store('brgy_images', 'public'); // Store each image
+                $imagesPaths[] = $image->store('brgy_images', 'public');
             }
         }
 
-        // Create the post (without user_id)
         $barangayPost = BarangayPost::create([
-            'caption' => $request->caption, // Store the caption
-            'images' => json_encode($imagesPaths), // Store images as JSON
+            'caption' => $request->caption,
+            'images' => json_encode($imagesPaths),
+        ]);
+
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => "Created a new Barangay Initiative post",
+            'details' => json_encode(['brgy_post_id' => $barangayPost->id]),
         ]);
 
         return response()->json($barangayPost, 201);
@@ -40,10 +45,9 @@ class BarangayPostsController extends Controller
     {
         $posts = BarangayPost::latest()->get();
 
-        // Decode images JSON and generate full URLs
         $posts->transform(function ($post) {
             $post->images = collect(json_decode($post->images))->map(function ($image) {
-                return asset('storage/' . $image); // ✅ Generate full URL
+                return asset('storage/' . $image);
             })->toArray();
             return $post;
         });
@@ -60,16 +64,14 @@ class BarangayPostsController extends Controller
             return response()->json(['message' => 'Post not found'], 404);
         }
 
-        // Decode images JSON and generate full URLs
         $barangayPost->images = collect(json_decode($barangayPost->images))->map(function ($image) {
-            return asset('storage/' . $image); // ✅ Convert to full URL
+            return asset('storage/' . $image);
         })->toArray();
 
         return response()->json($barangayPost);
     }
 
-
-    // UPDATE POST - working na sya cza
+    // UPDATE POST
     public function updatePost(Request $request, $id)
     {
         $post = BarangayPost::find($id);
@@ -90,20 +92,23 @@ class BarangayPostsController extends Controller
             $post->images = json_encode($images); 
         }
 
-        // ✅ Handle removed images
         if ($request->has('removedImages')) {
             foreach ($request->input('removedImages') as $image) {
                 $imagePath = str_replace(asset('storage/'), '', $image);
                 
-                // ✅ Check if file exists before deleting
                 if (\Storage::disk('public')->exists($imagePath)) {
                     \Storage::disk('public')->delete($imagePath);
                 }
             }
         }
 
-        // ✅ Save updated post
         $post->save();
+
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => "Edited a Barangay Initiative post",
+            'details' => json_encode(['brgy_post_id' => $post->id]),
+        ]);
 
         return response()->json([
             'message' => 'Post updated successfully',
@@ -124,7 +129,6 @@ class BarangayPostsController extends Controller
             $images = json_decode($barangayPost->images, true);
             
             foreach ($images as $imagePath) {
-                // ✅ Check if file exists before deleting
                 if (\Storage::disk('public')->exists($imagePath)) {
                     \Storage::disk('public')->delete($imagePath);
                 }
@@ -132,6 +136,12 @@ class BarangayPostsController extends Controller
         }
 
         $barangayPost->delete();
+
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => "Deleted a Barangay Initiative post",
+            'details' => json_encode(['brgy_post_id' => $barangayPost->id]),
+        ]);
         
         return response()->json(['message' => 'Post and associated images deleted successfully']);
     }

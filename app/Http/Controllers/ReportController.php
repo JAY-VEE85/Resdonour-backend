@@ -165,7 +165,7 @@ class ReportController extends Controller
         }
 
         $categories = [
-            "Reduce", "Reuse", "Recycle", "Gardening"
+            "Reduce", "Reuse", "Recycle"
         ];
 
         $startDate = Carbon::parse($request->input('start_date', Carbon::now()->startOfMonth()->toDateString()));

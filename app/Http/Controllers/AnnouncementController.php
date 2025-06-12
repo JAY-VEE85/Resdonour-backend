@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Announcement;
+use App\Models\ActivityLog;
 use Carbon\Carbon;
 
 class AnnouncementController extends Controller
@@ -37,13 +38,15 @@ class AnnouncementController extends Controller
             'image' => $imagePath,
             // 'expires_at' => $expiresAt, 
         ]);
+
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => "Created a new Announcement",
+            'details' => json_encode(['announcement_id' => $announcement->id]),
+        ]);
     
         return response()->json($announcement, 201);
     }
-    
-
-
-
     
     public function index(Request $request)
     {
@@ -125,6 +128,12 @@ class AnnouncementController extends Controller
         }
 
         $announcement->delete();
+
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => "Deleted an Announcement",
+            'details' => json_encode(['announcement_id' => $announcement->id]),
+        ]);
 
         return response()->json(['message' => 'Announcement deleted successfully'], 200); 
     }

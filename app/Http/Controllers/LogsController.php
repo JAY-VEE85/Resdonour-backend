@@ -41,7 +41,7 @@ class LogsController extends Controller
         $logs = ActivityLog::with(['user:id,fname,lname,role'])
             ->select('user_id', 'action', 'created_at')
             ->latest()
-            ->paginate();
+            ->paginate(100);
 
         $transformedLogs = $logs->map(function ($log) {
             return [
